@@ -314,7 +314,17 @@ export const evaluateOverview = (data = {}) => {
   const rules = normalizeRules(data.rules);
   const roles = Object.keys(rules.rosterSlots);
   const teams = Array.isArray(data.teams) ? data.teams : [];
-  const team = teams[0] || data.mine || { credits: 0, roster: [] };
+  const requestedOwner = Number(data.owner);
+  const mineIndex = teams.indexOf(data.mine);
+  const ownerIndex =
+    Number.isInteger(requestedOwner) &&
+    requestedOwner >= 0 &&
+    requestedOwner < teams.length
+      ? requestedOwner
+      : mineIndex >= 0
+        ? mineIndex
+        : 0;
+  const team = teams[ownerIndex] || data.mine || { credits: 0, roster: [] };
   const pool = Array.isArray(data.remaining) ? data.remaining : [];
   const needs = roleNeeds(team, rules);
   const slotsOpen = totalNeeds(needs);
@@ -330,7 +340,7 @@ export const evaluateOverview = (data = {}) => {
   const scarcity = scarcityModel(pool, teams, rules);
   const costFor = (item) =>
     estimatedCost(item, market, scarcity, valuation.normalizedFvm);
-  const budgetPlan = roleBudgetPlan(records, 0, needs, rules);
+  const budgetPlan = roleBudgetPlan(records, ownerIndex, needs, rules);
 
   const plans = Object.fromEntries(
     roles.map((role) => {
@@ -392,8 +402,8 @@ export const evaluateOverview = (data = {}) => {
     priorities,
     rolePlan: plans,
     summary: {
-      owner: 0,
-      ownerName: team.name || "Squadra 1",
+      owner: ownerIndex,
+      ownerName: team.name || `Squadra ${ownerIndex + 1}`,
       credits,
       reservedCredits,
       spendableCredits,

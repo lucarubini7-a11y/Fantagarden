@@ -176,6 +176,28 @@ test("owner index changes the evaluated team summary and limits", () => {
   assert.equal(constrained.legalMax, 22);
 });
 
+test("overview uses the selected owner instead of the first team", () => {
+  const teams = [
+    team("Rich", 100, {}),
+    team("Mine", 25, { P: 1, D: 1, C: 1, A: 1 }),
+  ];
+  const remaining = [player("P"), player("D"), player("C"), player("A")];
+
+  const result = evaluateOverview({
+    teams,
+    owner: 1,
+    mine: teams[1],
+    remaining,
+    assigned: {},
+  });
+
+  assert.equal(result.summary.owner, 1);
+  assert.equal(result.summary.ownerName, "Mine");
+  assert.equal(result.summary.credits, 25);
+  assert.equal(result.summary.slotsOpen, 4);
+  assert.equal(result.summary.reservedCredits, 4);
+});
+
 test("a full candidate role returns INELIGIBLE", () => {
   const candidate = player("A", 10);
   const teams = [team("Mine", 100, {})];

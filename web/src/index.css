@@ -8,6 +8,7 @@
 @import "./simulation-mode.css" layer(components);
 @import "./random-auction.css" layer(components);
 @import "./league-settings.css" layer(components);
+@import "./targets.css" layer(components);
 
 @layer components {
   .auction-advice {

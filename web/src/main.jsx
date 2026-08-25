@@ -6,7 +6,6 @@ import { LeagueSettings } from "./league-settings.jsx";
 import { normalizeRules } from "./league-rules.js";
 import { activeNominationRole } from "./auction-nomination.js";
 import {
-  auctionStorageKey,
   emptyAuction,
   isValidBid,
   legalMaxBid,
@@ -26,6 +25,17 @@ import {
   setTargetNote,
   targetsStorageKey,
 } from "./targets-state.js";
+import {
+  SESSION_SCHEMA_VERSION,
+  createAutosave,
+  createEnvelope,
+  exportEnvelope,
+  formatSavedAt,
+  loadActiveEnvelope,
+  parseImportedEnvelope,
+  saveEnvelope,
+  startNewSession,
+} from "./session-store.js";
 import {
   apiUrl,
   auctionDatasetPath,
@@ -850,14 +860,8 @@ function TargetsView({ data, rules, profileId, openPlayer }) {
     }
   });
   const [auctionState] = useState(() => {
-    try {
-      const saved = JSON.parse(
-        localStorage.getItem(auctionStorageKey(profileId)) || "null",
-      );
-      return rehydrateAuction(saved, data.players, rules);
-    } catch {
-      return null;
-    }
+    const { envelope } = loadActiveEnvelope(profileId);
+    return envelope ? rehydrateAuction(envelope.state.auction, data.players, rules) : null;
   });
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(serializeTargets(targets)));
@@ -1322,6 +1326,30 @@ function AuctionOverview({ overview }) {
   );
 }
 
+function SaveIndicator({ status }) {
+  const label =
+    status.status === "pending"
+      ? "Salvataggio..."
+      : status.status === "saved"
+        ? `Salvato alle ${formatSavedAt(status.at)}`
+        : status.status === "error"
+          ? `Errore nel salvataggio${status.error ? `: ${status.error}` : ""}`
+          : "";
+  if (!label) return null;
+  return (
+    <span className={`save-indicator ${status.status}`} role="status">
+      {label}
+    </span>
+  );
+}
+
+/** A previously nominated-but-unconfirmed player, restored only if still findable and unsold. */
+const restoreCandidate = (pending, players, assigned) => {
+  if (!pending) return null;
+  const candidate = players.find((p) => playerIdKey(p.id) === playerIdKey(pending.playerId));
+  return candidate && !assigned[playerIdKey(candidate.id)] ? candidate : null;
+};
+
 function Auction({ data, openPlayer, rules, profileId }) {
   const activeRules = normalizeRules(
     rules ?? data.league_rules ?? { startingCredits: 750 },
@@ -1329,7 +1357,6 @@ function Auction({ data, openPlayer, rules, profileId }) {
   const activeProfileId = String(
     profileId ?? data.profileId ?? data.profile_id ?? "default",
   );
-  const storageKey = auctionStorageKey(activeProfileId);
   const rulesSignature = JSON.stringify(activeRules);
   const configuredUserIndex = Number(activeRules.userTeam);
   const defaultUserTeamIndex = Math.max(
@@ -1340,38 +1367,56 @@ function Auction({ data, openPlayer, rules, profileId }) {
       ? configuredUserIndex
       : (activeRules.teamNames?.indexOf(activeRules.userTeam) ?? -1),
   );
-  const loadAuction = () => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
-      const legacy =
-        !saved && activeProfileId === "default"
-          ? JSON.parse(localStorage.getItem("fanta-auction-v1") || "null")
-          : null;
-      return (
-        rehydrateAuction(saved || legacy, data.players, activeRules) ||
-        emptyAuction(activeRules)
-      );
-    } catch {
-      return emptyAuction(activeRules);
+  const initializeSession = () => {
+    const { envelope, restored } = loadActiveEnvelope(activeProfileId);
+    if (envelope) {
+      const hydrated = rehydrateAuction(envelope.state.auction, data.players, activeRules);
+      if (hydrated) {
+        return {
+          meta: { sessionId: envelope.sessionId, name: envelope.name, createdAt: envelope.createdAt },
+          auctionState: hydrated,
+          pendingNomination: envelope.state.pendingNomination || null,
+          restoredAt: restored ? envelope.updatedAt : null,
+          warning: null,
+        };
+      }
     }
+    const fresh = createEnvelope(activeProfileId, activeRules);
+    return {
+      meta: { sessionId: fresh.sessionId, name: fresh.name, createdAt: fresh.createdAt },
+      auctionState: emptyAuction(activeRules),
+      pendingNomination: null,
+      restoredAt: null,
+      warning: envelope
+        ? "Non e' stato possibile ripristinare la sessione salvata (le regole della lega sono cambiate): ho aperto un'asta nuova. I dati precedenti restano salvati."
+        : null,
+    };
   };
-  const [state, setState] = useState(() => {
-    return loadAuction();
-  });
+  const [initial] = useState(initializeSession);
+  const initialCandidate = restoreCandidate(initial.pendingNomination, data.players, initial.auctionState.assigned);
+  const [state, setState] = useState(initial.auctionState);
+  const [envelopeMeta, setEnvelopeMeta] = useState(initial.meta);
+  const [restoredAt, setRestoredAt] = useState(initial.restoredAt);
   const [userTeamIndex, setUserTeamIndex] = useState(defaultUserTeamIndex);
-  const [query, setQuery] = useState("");
-  const [player, setPlayer] = useState(null);
-  const [owner, setOwner] = useState(userTeamIndex);
-  const [price, setPrice] = useState("");
+  const [query, setQuery] = useState(initialCandidate?.nome || "");
+  const [player, setPlayer] = useState(initialCandidate);
+  const [owner, setOwner] = useState(initialCandidate ? initial.pendingNomination.owner : userTeamIndex);
+  const [price, setPrice] = useState(initialCandidate ? initial.pendingNomination.price : "");
   const [advice, setAdvice] = useState(null);
   const [overviewAdvice, setOverviewAdvice] = useState(null);
   const [message, setMessage] = useState(
-    "Cerca un giocatore e assegna il suo prezzo.",
+    initial.warning || "Cerca un giocatore e assegna il suo prezzo.",
   );
-  const [messageType, setMessageType] = useState("info");
+  const [messageType, setMessageType] = useState(initial.warning ? "error" : "info");
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState({ status: "idle" });
   const worker = useRef();
   const skipPersist = useRef(false);
+  const importInputRef = useRef(null);
+  const autosaveRef = useRef(null);
+  if (!autosaveRef.current) {
+    autosaveRef.current = createAutosave({ delay: 400, onStatusChange: setSaveStatus });
+  }
   const workerHistory = state.history.flatMap((transaction) => {
     const transactionPlayer = data.players.find(
       (candidate) =>
@@ -1381,22 +1426,43 @@ function Auction({ data, openPlayer, rules, profileId }) {
       ? [{ ...transaction, player: transactionPlayer }]
       : [];
   });
+  useEffect(() => () => autosaveRef.current?.flush(), []);
   useEffect(() => {
+    autosaveRef.current?.flush();
     skipPersist.current = true;
-    setState(loadAuction());
+    const next = initializeSession();
+    const candidate = restoreCandidate(next.pendingNomination, data.players, next.auctionState.assigned);
+    setState(next.auctionState);
+    setEnvelopeMeta(next.meta);
+    setRestoredAt(next.restoredAt);
     setUserTeamIndex(defaultUserTeamIndex);
-    setOwner(defaultUserTeamIndex);
-    setPlayer(null);
-    setQuery("");
-    setPrice("");
-  }, [storageKey, rulesSignature, defaultUserTeamIndex]);
+    setPlayer(candidate);
+    setQuery(candidate?.nome || "");
+    setOwner(candidate ? next.pendingNomination.owner : defaultUserTeamIndex);
+    setPrice(candidate ? next.pendingNomination.price : "");
+    if (next.warning) {
+      setMessage(next.warning);
+      setMessageType("error");
+    }
+  }, [activeProfileId, rulesSignature, defaultUserTeamIndex]);
   useEffect(() => {
     if (skipPersist.current) {
       skipPersist.current = false;
       return;
     }
-    localStorage.setItem(storageKey, JSON.stringify(serializeAuction(state)));
-  }, [state, storageKey]);
+    autosaveRef.current.schedule({
+      schemaVersion: SESSION_SCHEMA_VERSION,
+      sessionId: envelopeMeta.sessionId,
+      profileId: activeProfileId,
+      name: envelopeMeta.name,
+      createdAt: envelopeMeta.createdAt,
+      updatedAt: new Date().toISOString(),
+      state: {
+        auction: serializeAuction(state),
+        pendingNomination: player ? { playerId: player.id, owner, price } : null,
+      },
+    });
+  }, [state, player, owner, price, envelopeMeta, activeProfileId]);
   useEffect(() => {
     worker.current = new Worker(
       new URL("./simulation.worker.js", import.meta.url),
@@ -1583,19 +1649,90 @@ function Auction({ data, openPlayer, rules, profileId }) {
     setMessage(`Ripristinata l'assegnazione di ${restoredPlayer.nome}.`);
     setMessageType("success");
   };
-  const flushAuction = () => {
+  const startNewAuction = () => {
     if (
       !window.confirm(
-        "Vuoi cancellare tutta l'asta salvata? L'operazione non puo essere annullata.",
+        "Vuoi iniziare una nuova asta? La sessione corrente resta salvata e recuperabile, ma non sara' piu' quella attiva.",
       )
     )
       return;
+    autosaveRef.current.flush();
+    const { envelope } = startNewSession(activeProfileId, activeRules);
+    skipPersist.current = true;
     setState(emptyAuction(activeRules));
+    setEnvelopeMeta({ sessionId: envelope.sessionId, name: envelope.name, createdAt: envelope.createdAt });
+    setRestoredAt(null);
     setPlayer(null);
     setQuery("");
     setPrice("");
     setSuggestionsOpen(false);
-    setMessage("Asta azzerata. Puoi impostare di nuovo i crediti iniziali.");
+    setMessage("Nuova asta iniziata. La sessione precedente resta salvata.");
+    setMessageType("success");
+  };
+  const exportSession = () => {
+    const envelope = {
+      schemaVersion: SESSION_SCHEMA_VERSION,
+      sessionId: envelopeMeta.sessionId,
+      profileId: activeProfileId,
+      name: envelopeMeta.name,
+      createdAt: envelopeMeta.createdAt,
+      updatedAt: new Date().toISOString(),
+      state: {
+        auction: serializeAuction(state),
+        pendingNomination: player ? { playerId: player.id, owner, price } : null,
+      },
+    };
+    const blob = new Blob([exportEnvelope(envelope)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `asta-${activeProfileId}-${envelope.sessionId.slice(0, 8)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+  const importSession = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (
+      !window.confirm(
+        "Importare questo file sostituira' l'asta visualizzata ora. La sessione corrente resta comunque salvata e recuperabile. Continuare?",
+      )
+    )
+      return;
+    const text = await file.text();
+    const result = parseImportedEnvelope(text, {
+      profileId: activeProfileId,
+      players: data.players,
+      rules: activeRules,
+    });
+    if (!result.ok) {
+      setMessage(`Import non riuscito: ${result.error}`);
+      setMessageType("error");
+      return;
+    }
+    autosaveRef.current.cancel();
+    const applied = { ...result.envelope, updatedAt: new Date().toISOString() };
+    const saved = saveEnvelope(applied);
+    if (!saved.ok) {
+      setMessage(`Import riuscito ma il salvataggio e' fallito: ${saved.error}`);
+      setMessageType("error");
+      return;
+    }
+    skipPersist.current = true;
+    const hydrated = rehydrateAuction(applied.state.auction, data.players, activeRules) || emptyAuction(activeRules);
+    const candidate = restoreCandidate(applied.state.pendingNomination, data.players, hydrated.assigned);
+    setState(hydrated);
+    setEnvelopeMeta({ sessionId: applied.sessionId, name: applied.name, createdAt: applied.createdAt });
+    setRestoredAt(applied.updatedAt);
+    setPlayer(candidate);
+    setQuery(candidate?.nome || "");
+    setOwner(candidate ? applied.state.pendingNomination.owner : userTeamIndex);
+    setPrice(candidate ? applied.state.pendingNomination.price : "");
+    setSaveStatus({ status: "saved", at: applied.updatedAt });
+    setMessage(`Asta "${applied.name}" importata correttamente.`);
     setMessageType("success");
   };
   const canSetStartingCredits =
@@ -1622,7 +1759,20 @@ function Auction({ data, openPlayer, rules, profileId }) {
           Un passaggio alla volta: scegli il giocatore, indica chi lo compra e
           conferma il prezzo.
         </p>
+        <SaveIndicator status={saveStatus} />
       </div>
+      {restoredAt && (
+        <p className="session-banner" role="status">
+          Sessione ripristinata — ultimo salvataggio {formatSavedAt(restoredAt)}
+          <button
+            type="button"
+            onClick={() => setRestoredAt(null)}
+            aria-label="Chiudi avviso sessione ripristinata"
+          >
+            ×
+          </button>
+        </p>
+      )}
       <div className="auction-owner">
         <label htmlFor="auction-user-team">La mia squadra</label>
         <select
@@ -1748,8 +1898,19 @@ function Auction({ data, openPlayer, rules, profileId }) {
           <button onClick={redo} disabled={!state.undone?.length}>
             Ripristina
           </button>
-          <button className="flush" onClick={flushAuction}>
-            Flush asta
+          <button onClick={exportSession}>Esporta asta</button>
+          <button onClick={() => importInputRef.current?.click()}>
+            Importa asta
+          </button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json"
+            onChange={importSession}
+            style={{ display: "none" }}
+          />
+          <button className="flush" onClick={startNewAuction}>
+            Nuova asta
           </button>
         </div>
       </div>

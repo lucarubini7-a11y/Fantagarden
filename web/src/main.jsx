@@ -247,7 +247,7 @@ function App() {
       <header className="app-header">
         <button className="brand" onClick={() => navigate("overview")}>
           <span>{profile?.season?.season || "FANTACALCIO"}</span>
-          <strong>FISHERTIGER TEST</strong>
+          <strong>Control room</strong>
         </button>
         <div
           className="history-controls"

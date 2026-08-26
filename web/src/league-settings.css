@@ -1,24 +1,20 @@
 .league-settings {
-  --ink: #e8eee7;
-  --muted: #aeb9b0;
-  --line: #405046;
-  --paper: transparent;
-  --panel: #151d18;
-  --panel-raised: #1c2821;
-  --input: #101512;
-  --lime: #d8f0a0;
-  --lime-ink: #112014;
-  --danger: #d38372;
+  --ink: var(--color-text);
+  --muted: var(--color-text-muted);
+  --line: var(--color-border);
+  --paper: var(--color-surface);
+  --panel: var(--color-surface-raised);
+  --panel-raised: var(--color-pitch-tint);
+  --input: var(--color-surface-raised);
+  --lime: var(--color-pitch);
+  --lime-ink: var(--color-pitch-text);
+  --danger: var(--color-red-card);
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0;
+  padding: var(--space-lg);
   color: var(--ink);
   background: var(--paper);
-  font:
-    16px/1.45 Inter,
-    ui-sans-serif,
-    system-ui,
-    sans-serif;
+  font: 16px/1.45 var(--font-ui);
 }
 .ls-header {
   max-width: 650px;
@@ -56,7 +52,7 @@
 .ls-errors {
   border: 1px solid var(--danger);
   border-radius: 9px;
-  background: #402923;
+  background: var(--color-red-card-tint);
   padding: 14px 18px;
   margin: 18px 0;
 }
@@ -65,10 +61,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border: 1px solid #6fae69;
+  border: 1px solid var(--color-yellow-card);
   border-radius: 9px;
-  background: #1f3523;
-  color: #d8f0a0;
+  background: var(--color-yellow-card-tint);
+  color: var(--ink);
   padding: 12px 18px;
   margin: 18px 0;
   font-size: 13px;
@@ -126,8 +122,8 @@
 .ls-payouts input,
 .ls-tier input {
   width: 100%;
-  min-height: 42px;
-  border: 1px solid #526258;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 8px 10px;
   color: var(--ink);
@@ -141,7 +137,7 @@
 .ls-team input:focus,
 .ls-payouts input:focus,
 .ls-tier input:focus {
-  outline: 3px solid #cbff8b;
+  outline: 3px solid var(--focus-ring-color);
   outline-offset: 1px;
   border-color: var(--lime);
 }
@@ -173,7 +169,7 @@
   right: 0;
   left: 0;
   border-radius: 999px;
-  background: #405046;
+  background: var(--color-disabled-bg);
 }
 .ls-dual-range::after {
   left: var(--range-start);
@@ -206,9 +202,9 @@
   background: transparent;
 }
 .ls-dual-range input[type="range"]::-webkit-slider-thumb {
-  width: 22px;
-  height: 22px;
-  margin-top: -7px;
+  width: 26px;
+  height: 26px;
+  margin-top: -9px;
   border: 3px solid var(--lime-ink);
   border-radius: 50%;
   appearance: none;
@@ -217,8 +213,8 @@
   cursor: grab;
 }
 .ls-dual-range input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border: 3px solid var(--lime-ink);
   border-radius: 50%;
   pointer-events: auto;
@@ -233,11 +229,11 @@
   outline: none;
 }
 .ls-dual-range input[type="range"]:focus-visible::-webkit-slider-thumb {
-  outline: 3px solid #cbff8b;
+  outline: 3px solid var(--focus-ring-color);
   outline-offset: 3px;
 }
 .ls-dual-range input[type="range"]:focus-visible::-moz-range-thumb {
-  outline: 3px solid #cbff8b;
+  outline: 3px solid var(--focus-ring-color);
   outline-offset: 3px;
 }
 .ls-range-values {
@@ -286,10 +282,11 @@
   text-decoration: none;
   font-weight: 800;
   padding: 4px;
+  min-height: 44px;
 }
 .ls-text-button:disabled,
 .ls-remove:disabled {
-  color: #77857b;
+  color: var(--color-disabled-text);
   cursor: not-allowed;
 }
 .ls-source {
@@ -326,7 +323,7 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #77857b;
+  background: var(--color-disabled-text);
 }
 .ls-source-status.present {
   color: var(--lime);
@@ -335,34 +332,33 @@
   background: var(--lime);
 }
 .ls-source-status.missing {
-  color: #f1b7a8;
+  color: var(--color-red-card);
 }
 .ls-source-status.missing i {
   background: var(--danger);
 }
 .ls-source-status.uploading i,
 .ls-source-status.checking i {
-  background: #d8be68;
+  background: var(--color-yellow-card);
 }
 .league-settings .ls-upload {
   position: relative;
   display: inline-flex;
-  min-height: 40px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border: 1px solid #55715e;
+  border: 1px solid var(--color-border);
   border-radius: 7px;
   padding: 8px 14px;
-  background: #263a2d;
-  color: var(--ink);
+  background: var(--color-pitch);
+  color: var(--color-pitch-text);
   cursor: pointer;
   font-size: 13px;
   font-weight: 800;
 }
 .ls-upload:hover {
-  border-color: var(--lime);
-  background: #355541;
+  background: var(--color-pitch-hover);
 }
 .ls-upload input {
   position: absolute;
@@ -371,7 +367,7 @@
   opacity: 0;
 }
 .ls-upload:has(input:focus-visible) {
-  outline: 3px solid #cbff8b;
+  outline: 3px solid var(--focus-ring-color);
   outline-offset: 2px;
 }
 .ls-upload:has(input:disabled) {
@@ -485,6 +481,10 @@
 .ls-slots .ls-field {
   width: 120px;
 }
+.ls-slots .ls-field input {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
 .ls-options {
   padding: 6px 0;
 }
@@ -527,7 +527,7 @@
 .ls-invalid-choice {
   margin-top: 8px;
   border-color: var(--danger);
-  color: #f1b7a8;
+  color: var(--color-red-card);
   font-weight: 800;
 }
 .ls-order-actions {
@@ -537,15 +537,17 @@
 .ls-order-actions button {
   border: 1px solid var(--line);
   border-radius: 5px;
-  background: #263429;
+  background: var(--color-surface-raised);
   color: var(--ink);
   padding: 3px 8px;
   font: inherit;
   font-size: 12px;
   font-weight: 800;
+  min-height: 32px;
+  min-width: 32px;
 }
 .ls-order-actions button:focus-visible {
-  outline: 3px solid #cbff8b;
+  outline: 3px solid var(--focus-ring-color);
   outline-offset: 2px;
 }
 .ls-toggle {
@@ -583,24 +585,24 @@
   font-weight: 900;
 }
 .ls-actions .ls-generate {
-  border-color: #55715e;
-  background: #263a2d;
+  border-color: var(--color-border);
+  background: var(--color-surface-raised);
   color: var(--ink);
 }
 .ls-actions button:disabled {
   border-color: var(--line);
-  background: #202a23;
-  color: #77857b;
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
   cursor: not-allowed;
 }
 .ls-actions button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6px 16px rgba(27, 94, 58, 0.18);
 }
 .ls-actions button:focus-visible,
 .ls-text-button:focus-visible,
 .ls-remove:focus-visible {
-  outline: 3px solid #cbff8b;
+  outline: 3px solid var(--focus-ring-color);
   outline-offset: 3px;
 }
 @media (max-width: 700px) {

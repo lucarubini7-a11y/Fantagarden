@@ -50,10 +50,10 @@ test("playerStatusBadge renders infortunato/diffidato/in_dubbio", () => {
     Barella: { stato: "diffidato" },
     Dumfries: { stato: "in_dubbio" },
   };
-  assert.equal(playerStatusBadge(players, "Lautaro").label, "INF");
+  assert.equal(playerStatusBadge(players, "Lautaro").ariaLabel, "Infortunato");
   assert.equal(playerStatusBadge(players, "Lautaro").title, "Muscolare · highlightly");
-  assert.equal(playerStatusBadge(players, "Barella").label, "DIFF");
-  assert.equal(playerStatusBadge(players, "Dumfries").label, "?");
+  assert.equal(playerStatusBadge(players, "Barella").ariaLabel, "Diffidato");
+  assert.equal(playerStatusBadge(players, "Dumfries").ariaLabel, "In dubbio");
 });
 
 test("playerStatusBadge is silent for disponibile, sconosciuto, and unknown players", () => {

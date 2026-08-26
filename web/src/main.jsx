@@ -1344,9 +1344,12 @@ function PlayerStatusBadge({ players, name }) {
   const badge = playerStatusBadge(players, name);
   if (!badge) return null;
   return (
-    <i className={`player-status-badge ${badge.className}`} title={badge.title}>
-      {badge.emoji} {badge.label}
-    </i>
+    <i
+      className={`player-status-badge ${badge.className}`}
+      role="img"
+      aria-label={badge.ariaLabel}
+      title={badge.title}
+    />
   );
 }
 
@@ -1434,6 +1437,7 @@ function Auction({ data, openPlayer, rules, profileId, apiBase, playerStatus, on
   const [messageType, setMessageType] = useState(initial.warning ? "error" : "info");
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState({ status: "idle" });
+  const [mobileTeamIndex, setMobileTeamIndex] = useState(0);
   const worker = useRef();
   const skipPersist = useRef(false);
   const importInputRef = useRef(null);
@@ -2032,12 +2036,50 @@ function Auction({ data, openPlayer, rules, profileId, apiBase, playerStatus, on
           apiBase={apiBase}
         />
       )}
+      <div className="auction-teams-carousel-nav">
+        <button
+          type="button"
+          onClick={() => setMobileTeamIndex((index) => Math.max(0, index - 1))}
+          disabled={mobileTeamIndex === 0}
+          aria-label="Squadra precedente"
+        >
+          ‹
+        </button>
+        <span>
+          <strong>{state.teams[mobileTeamIndex]?.name}</strong>
+          <small>
+            Squadra {mobileTeamIndex + 1} di {state.teams.length}
+          </small>
+        </span>
+        <button
+          type="button"
+          onClick={() =>
+            setMobileTeamIndex((index) =>
+              Math.min(state.teams.length - 1, index + 1),
+            )
+          }
+          disabled={mobileTeamIndex === state.teams.length - 1}
+          aria-label="Squadra successiva"
+        >
+          ›
+        </button>
+      </div>
       <div className="auction-teams">
         {state.teams.map((team, i) => {
           const left = slotsLeft(team, activeRules),
             max = legalMaxBid(team, activeRules);
+          const isNominating = Boolean(player) && i === owner;
+          const isMobileActive = i === mobileTeamIndex;
           return (
-            <article key={i}>
+            <article
+              key={i}
+              className={[
+                isNominating ? "nominating" : "",
+                isMobileActive ? "mobile-active" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
               <label>
                 Nome squadra
                 <input

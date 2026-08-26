@@ -1,24 +1,24 @@
 .random-auction {
-  --ra-bg: #0b1210;
-  --ra-panel: #14201b;
-  --ra-panel-raised: #1b2a23;
-  --ra-border: #42594d;
-  --ra-text: #f4f8f5;
-  --ra-muted: #bdc9c1;
-  --ra-accent: #c8ff63;
-  --ra-accent-dark: #18220b;
-  --ra-mine: #72e4ff;
+  --ra-bg: var(--color-surface);
+  --ra-panel: var(--color-surface-raised);
+  --ra-panel-raised: var(--color-pitch-tint);
+  --ra-border: var(--color-border);
+  --ra-text: var(--color-text);
+  --ra-muted: var(--color-text-muted);
+  --ra-accent: var(--color-pitch);
+  --ra-accent-dark: var(--color-pitch-text);
+  --ra-mine: var(--color-active-nomination);
   width: 100%;
   padding: clamp(18px, 3vw, 40px);
   color: var(--ra-text);
   background:
     radial-gradient(
       circle at 92% 0%,
-      rgba(114, 228, 255, 0.12),
+      var(--color-active-nomination-bg-subtle),
       transparent 32rem
     ),
     var(--ra-bg);
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-ui);
 }
 
 .random-auction *,
@@ -88,8 +88,8 @@
   min-height: 44px;
   padding: 9px 12px;
   color: var(--ra-text);
-  background: #080d0b;
-  border: 2px solid #718378;
+  background: var(--color-surface-raised);
+  border: 2px solid var(--ra-border);
   border-radius: 10px;
   font: inherit;
 }
@@ -97,30 +97,30 @@
 .random-auction button {
   min-height: 44px;
   padding: 10px 15px;
-  color: #fff;
-  background: #263a30;
-  border: 2px solid #91a99b;
+  color: var(--ra-text);
+  background: var(--color-surface-raised);
+  border: 2px solid var(--ra-border);
   border-radius: 10px;
   font: 800 14px/1.1 inherit;
   cursor: pointer;
 }
 
 .random-auction button:hover:not(:disabled) {
-  color: #071008;
-  background: #fff;
-  border-color: #fff;
+  color: var(--ra-accent-dark);
+  background: var(--ra-accent);
+  border-color: var(--ra-accent);
 }
 
 .random-auction button:focus-visible,
 .random-auction input:focus-visible {
-  outline: 3px solid var(--ra-mine);
+  outline: 3px solid var(--focus-ring-color);
   outline-offset: 3px;
 }
 
 .random-auction button:disabled {
-  color: #8e9992;
-  background: #202a25;
-  border-color: #4c5a52;
+  color: var(--color-disabled-text);
+  background: var(--color-disabled-bg);
+  border-color: var(--ra-border);
   cursor: not-allowed;
   opacity: 1;
 }
@@ -134,9 +134,9 @@
 .ra-error,
 .ra-inline-error {
   padding: 13px 15px;
-  color: #fff;
-  background: #5c211f;
-  border: 2px solid #ffaaa4;
+  color: var(--ra-text);
+  background: var(--color-red-card-tint);
+  border: 2px solid var(--color-red-card);
   border-radius: 5px;
 }
 
@@ -180,6 +180,8 @@
   display: block;
   margin: 2px 0;
   font-size: 23px;
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
 }
 
 .ra-replay progress {
@@ -205,7 +207,7 @@
 }
 
 .ra-current.is-mine {
-  background: #102831;
+  background: var(--color-active-nomination-bg-subtle);
   border-color: var(--ra-mine);
   box-shadow: inset 6px 0 0 var(--ra-mine);
 }
@@ -215,7 +217,7 @@
   width: 64px;
   height: 64px;
   place-items: center;
-  color: #08100c;
+  color: var(--ra-accent-dark);
   background: var(--ra-accent);
   border-radius: 50%;
   font-size: 24px;
@@ -242,7 +244,7 @@
 .ra-current dl div,
 .ra-price-grid div {
   padding: 12px;
-  background: rgba(5, 10, 8, 0.52);
+  background: var(--color-surface);
   border: 1px solid var(--ra-border);
 }
 
@@ -258,6 +260,7 @@
   margin-top: 5px;
   font-size: 16px;
   font-weight: 850;
+  font-variant-numeric: tabular-nums;
 }
 
 .ra-before {
@@ -290,7 +293,7 @@
 
 .ra-state {
   padding: 8px 10px;
-  color: #071008;
+  color: var(--ra-accent-dark);
   background: var(--ra-accent);
   font-size: 12px;
   font-weight: 900;
@@ -309,25 +312,25 @@
   align-items: baseline;
   margin-top: 16px;
   padding: 12px 14px;
-  color: #f4f8f5;
-  background: #223229;
-  border: 1px solid #668071;
+  color: var(--ra-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--ra-border);
   border-radius: 10px;
 }
 
 .ra-outcome.good {
-  background: #173822;
-  border-color: #75b985;
+  background: var(--color-pitch-tint);
+  border-color: var(--color-pitch);
 }
 
 .ra-outcome.warning {
-  background: #512b25;
-  border-color: #e29a86;
+  background: var(--color-yellow-card-tint);
+  border-color: var(--color-yellow-card);
 }
 
 .ra-outcome.notice {
-  background: #473d20;
-  border-color: #d8be68;
+  background: var(--color-active-nomination-bg-subtle);
+  border-color: var(--color-active-nomination);
 }
 
 .ra-outcome b {
@@ -335,7 +338,7 @@
 }
 
 .ra-outcome span {
-  color: #e1e9e3;
+  color: var(--ra-text);
   font-size: 13px;
   line-height: 1.4;
 }
@@ -344,7 +347,7 @@
 .ra-advice-list,
 .ra-alternatives {
   padding: 16px;
-  background: #0d1713;
+  background: var(--color-surface);
   border: 1px solid var(--ra-border);
 }
 
@@ -361,6 +364,8 @@
   color: var(--ra-accent);
   font-size: 21px;
   line-height: 1.1;
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
 }
 
 .ra-price-grid {
@@ -371,6 +376,7 @@
 .ra-price-grid dd {
   color: var(--ra-accent);
   font-size: 20px;
+  font-family: var(--font-display);
 }
 
 .ra-advice-list h3,
@@ -419,7 +425,7 @@
 .ra-team-grid > article {
   min-width: 0;
   overflow: hidden;
-  background: #0d1713;
+  background: var(--color-surface);
   border: 1px solid var(--ra-border);
 }
 
@@ -450,6 +456,7 @@
 .ra-team-grid header > strong {
   color: var(--ra-accent);
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .ra-role-summary {
@@ -474,7 +481,7 @@
   gap: 7px;
   align-items: center;
   padding: 8px 10px;
-  border-top: 1px solid #26362e;
+  border-top: 1px solid var(--ra-border);
   font-size: 11px;
 }
 
@@ -494,6 +501,7 @@
   font-size: 12px;
 }
 
+/* Etichette di ruolo: sistema categorico isolato, non fa parte della palette semantica. */
 .ra-role {
   display: inline-grid;
   min-height: 23px;
@@ -543,7 +551,7 @@
 .ra-standings caption {
   padding: 15px;
   color: var(--ra-text);
-  background: #0d1713;
+  background: var(--color-surface);
   font-size: 17px;
   font-weight: 850;
   text-align: left;
@@ -567,7 +575,7 @@
 }
 
 .ra-standings tr.is-mine {
-  color: #061116;
+  color: var(--color-active-nomination-text);
   background: var(--ra-mine);
 }
 

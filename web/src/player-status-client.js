@@ -15,15 +15,18 @@ export async function fetchPlayerStatus(apiBase, { fetchImpl = globalThis.fetch,
   }
 }
 
+// A literal "cartellino": color and shape alone read as infortunato/diffidato/in
+// dubbio the same way a football card does, no legend needed. ariaLabel carries
+// the full word for anyone not seeing the color (screen reader, color-blindness).
 const BADGES = {
-  infortunato: { label: "INF", emoji: "🔴", className: "player-status-inf" },
-  diffidato: { label: "DIFF", emoji: "🟡", className: "player-status-diff" },
-  in_dubbio: { label: "?", emoji: "🟠", className: "player-status-dubbio" },
+  infortunato: { ariaLabel: "Infortunato", className: "player-status-inf" },
+  diffidato: { ariaLabel: "Diffidato", className: "player-status-diff" },
+  in_dubbio: { ariaLabel: "In dubbio", className: "player-status-dubbio" },
 };
 
 /**
- * Returns {emoji, label, className, title} for a player worth flagging, or
- * null for disponibile/sconosciuto/no entry - those are silent by design.
+ * Returns {ariaLabel, className, title} for a player worth flagging, or null
+ * for disponibile/sconosciuto/no entry - those are silent by design.
  */
 export function playerStatusBadge(players, playerName) {
   const entry = players?.[playerName];

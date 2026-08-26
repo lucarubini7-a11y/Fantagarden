@@ -1,0 +1,84 @@
+/**
+ * Unified design tokens - the "cartellino" (football card) system.
+ *
+ * Base palette and semantics per spec; contrast ratios noted inline are as
+ * verified against the paired background at the time these values were set.
+ * Do not change a color value without re-checking contrast against every
+ * background it is paired with elsewhere in this file.
+ */
+:root {
+  /* Colori base */
+  --color-surface: #FAFAF7;       /* bianco gesso, sfondo principale */
+  --color-text: #1A2B22;          /* verde-nero scuro, testo primario */
+  --color-text-muted: #5A6B5F;
+
+  /* Colori semantici (sistema "cartellino") */
+  --color-pitch: #1B5E3A;         /* verde campo: header, stato ok/disponibile */
+  --color-pitch-text: #FFFFFF;    /* testo SEMPRE bianco su verde campo (7.75:1) */
+
+  --color-yellow-card: #E8B923;   /* diffidati, warning budget */
+  --color-yellow-card-text: #1A2B22; /* testo SEMPRE scuro su giallo (8.07:1) — MAI bianco, fallisce il contrasto a 1.84:1 */
+
+  --color-red-card: #C6362E;      /* infortunati, budget esaurito, errori */
+  --color-red-card-text: #FFFFFF; /* testo bianco su rosso (5.29:1) */
+
+  --color-active-nomination: #0B4F8F; /* blu maglia: unico accento "freddo",
+                                          usato SOLO per evidenziare la
+                                          squadra/riga che sta nominando
+                                          in questo momento, mai per altro,
+                                          così resta un segnale univoco */
+  --color-active-nomination-text: #FFFFFF; /* 8.30:1 */
+  --color-active-nomination-bg-subtle: rgba(11, 79, 143, 0.08); /* per evidenziare
+                                          righe/celle senza saturare */
+
+  /* Tipografia */
+  --font-ui: "Inter", "IBM Plex Sans", system-ui, sans-serif;
+  --font-display: "Barlow Condensed", "Inter", sans-serif; /* SOLO per numeri
+                                          grandi di crediti/budget, mai per
+                                          testo normale — è l'elemento
+                                          "firma" del tool */
+
+  /* Spaziature (scala 4px) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Bordi */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --border-hairline: 1px solid rgba(27, 94, 58, 0.2); /* verde campo tenue,
+                                          per i divisori, mai ombre pesanti */
+
+  /*
+   * Estensioni al sistema — coprono concetti che il set di token base non
+   * copre esplicitamente ma che ricorrono in più componenti. Ogni estensione
+   * è derivata dalla stessa palette, mai un colore scollegato.
+   */
+  --color-border: rgba(27, 94, 58, 0.2);            /* colore puro di --border-hairline, per comporre bordi custom (spessore/stile diversi) */
+  --color-surface-raised: #FFFFFF;                   /* card/pannelli sul fondo leggermente panna della superficie principale */
+  --color-pitch-tint: rgba(27, 94, 58, 0.08);        /* sfondo tenue per stati positivi/successo senza saturare come --color-pitch pieno */
+  --color-yellow-card-tint: rgba(232, 185, 35, 0.14); /* sfondo tenue per warning/banner, testo resta --color-text */
+  --color-red-card-tint: rgba(198, 54, 46, 0.10);     /* sfondo tenue per errori, testo resta --color-text o --color-red-card */
+  --color-disabled-bg: #E7E4DC;                       /* controlli disabilitati: neutro derivato da --color-surface, non uno dei tre semantici */
+  --color-disabled-text: #8A8F87;
+  --focus-ring-color: var(--color-active-nomination); /* anello di focus coerente con la palette invece del blu di default del browser */
+  --color-active-nomination-muted: color-mix(in srgb, var(--color-active-nomination) 55%, var(--color-text-muted)); /* stessa
+                                          famiglia del blu maglia ma desaturato, per elementi
+                                          che devono restare "nella famiglia" visiva senza
+                                          competere col segnale univoco della nomina attiva */
+  --color-pitch-hover: color-mix(in srgb, var(--color-pitch) 82%, black); /* --color-pitch scurito, per stati :hover su bottoni pieni */
+}
+
+/* Le colonne di crediti/prezzi non devono "ballare" quando i valori cambiano. */
+.tabular-nums,
+[data-tabular-nums] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Anello di focus coerente con la palette su ogni elemento interattivo in ambito. */
+:focus-visible {
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}

@@ -1,7 +1,7 @@
-.session-banner{display:flex;align-items:center;gap:10px;margin:0 0 16px;padding:10px 14px;border:1px solid #6fae69;border-radius:8px;background:#1f3523;color:#d8f0a0;font-size:13px}
-.session-banner button{margin-left:auto;border:0;background:transparent;color:#d8f0a0;font-size:16px;line-height:1;padding:0 4px}
-.save-indicator{display:inline-block;margin-top:8px;font-size:11px;color:#8fa18f;font-family:ui-monospace,monospace}
-.save-indicator.error{color:#e8a58f}
-.save-indicator.saved{color:#9acb61}
+.session-banner{display:flex;align-items:center;gap:10px;margin:0 0 16px;padding:10px 14px;border:1px solid var(--color-pitch);border-radius:8px;background:var(--color-pitch-tint);color:var(--color-text);font-size:13px}
+.session-banner button{margin-left:auto;border:0;background:transparent;color:var(--color-pitch);font-size:16px;line-height:1;padding:0 4px;min-width:32px;min-height:32px}
+.save-indicator{display:inline-block;margin-top:8px;font-size:11px;color:var(--color-text-muted);font-family:ui-monospace,monospace}
+.save-indicator.error{color:var(--color-red-card)}
+.save-indicator.saved{color:var(--color-pitch)}
 .auction-history{flex-wrap:wrap}
 @media(max-width:760px){.auction-history{width:100%}.auction-history button{flex:1 1 calc(50% - 8px)}}

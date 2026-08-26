@@ -1,1 +1,70 @@
-.auction-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}.auction-summary>div,.auction-status{border:1px solid #405046;border-radius:9px;background:#18221b;padding:14px}.auction-summary span,.auction-summary small{display:block;color:#afbcaf;font-size:12px}.auction-summary strong{display:block;margin:4px 0;font-size:23px}.auction-status{margin:0 0 14px;line-height:1.4}.auction-status.success{border-color:#6fae69;background:#1f3523}.auction-status.error{border-color:#d38372;background:#402923}.auction-bar{align-items:flex-start}.auction-search label,.auction-advice label,.auction-teams label{display:block;color:#bce785;font-size:12px;font-weight:700}.auction-search input,.auction-advice input,.auction-advice select,.auction-teams input{margin-top:5px}.auction-results>span{display:block;padding:8px 10px;color:#afbcaf;font-size:12px}.auction-history{display:flex;gap:8px}.auction-history button,.auction-actions button{min-height:42px}.auction-advice label{min-width:155px}.auction-advice label select,.auction-advice label input{display:block;width:100%}.auction-actions{display:flex;flex-wrap:wrap;gap:8px}.auction-actions .secondary{background:#27342b}.auction-teams article label{color:#bce785;font-size:11px}.auction-teams article label input{width:100%;background:transparent;border:0;border-bottom:1px solid #526258;color:#fff;font-weight:750}.empty-roster{display:block;padding:12px 0;color:#98a698;font-size:13px}@media(max-width:760px){.auction-summary{grid-template-columns:1fr}.auction-bar{display:block}.auction-search{max-width:none}.auction-history{margin-top:10px}.auction-history button{flex:1}.auction-advice{display:grid;grid-template-columns:1fr;gap:12px}.auction-advice>div{min-width:0}.auction-advice label{min-width:0}.auction-actions button{flex:1 1 100%}}
+.auction-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+.auction-summary>div,.auction-status{border:var(--border-hairline);border-radius:9px;background:var(--color-surface-raised);padding:14px}
+.auction-summary span,.auction-summary small{display:block;color:var(--color-text-muted);font-size:12px}
+.auction-summary strong{display:block;margin:4px 0;font-size:23px;font-family:var(--font-display);font-variant-numeric:tabular-nums}
+.auction-status{margin:0 0 14px;line-height:1.4}
+.auction-status.success{border-color:var(--color-pitch);background:var(--color-pitch-tint)}
+.auction-status.error{border-color:var(--color-red-card);background:var(--color-red-card-tint)}
+.auction-bar{align-items:flex-start}
+.auction-search label,.auction-advice label,.auction-teams label{display:block;color:var(--color-pitch);font-size:12px;font-weight:700}
+.auction-search input,.auction-advice input,.auction-advice select,.auction-teams input{margin-top:5px}
+.auction-results>span{display:block;padding:8px 10px;color:var(--color-text-muted);font-size:12px}
+.auction-history{display:flex;flex-wrap:wrap;gap:8px}
+.auction-history button,.auction-actions button{min-height:44px}
+.auction-advice label{min-width:155px}
+.auction-advice label select,.auction-advice label input{display:block;width:100%}
+.auction-actions{display:flex;flex-wrap:wrap;gap:8px}
+.auction-actions .secondary{background:var(--color-surface-raised);color:var(--color-text)}
+.auction-teams article label{color:var(--color-pitch);font-size:11px}
+.auction-teams article label input{width:100%;background:transparent;border:0;border-bottom:1px solid var(--color-border);color:var(--color-text);font-weight:750}
+.empty-roster{display:block;padding:12px 0;color:var(--color-text-muted);font-size:13px}
+
+/* Tracker: header "cartellino" verde campo, righe con divisori hairline. */
+.auction-bar{display:flex;gap:10px;margin-bottom:18px}
+.auction-search{position:relative;min-width:430px}
+.auction-search input{width:100%}
+.auction-search>div{position:absolute;z-index:2;width:100%;background:var(--color-surface-raised);border:1px solid var(--color-border);border-radius:var(--radius-sm);overflow:hidden}
+.auction-search>div button{display:grid;grid-template-columns:26px 1fr auto;width:100%;gap:7px;background:var(--color-surface-raised);border:0;border-bottom:var(--border-hairline);padding:9px;text-align:left}
+.auction-search small{color:var(--color-text-muted)}
+.auction-bar>button{border:1px solid var(--color-border);background:var(--color-surface-raised);border-radius:var(--radius-sm);padding:8px 12px;min-height:44px}
+.auction-advice{display:grid;grid-template-columns:1.3fr 1fr 1fr 100px auto auto;gap:10px;align-items:center;background:var(--color-pitch-tint);color:var(--color-text);padding:16px;border-radius:9px;margin-bottom:16px;border:var(--border-hairline)}
+.auction-advice h2{margin:5px 0}
+.auction-advice p,.auction-advice small{color:var(--color-text-muted);font-size:12px}
+.auction-advice strong{display:block;font-size:34px;font-family:var(--font-display);font-variant-numeric:tabular-nums}
+.auction-advice button{background:var(--color-pitch);color:var(--color-pitch-text);border:0;border-radius:5px;padding:10px;min-height:44px}
+
+.auction-teams{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.auction-teams article{background:var(--color-surface-raised);border:1px solid var(--color-border);border-radius:8px;padding:13px;min-height:150px}
+.auction-teams article.nominating{background:var(--color-active-nomination-bg-subtle);border-color:var(--color-active-nomination)}
+.auction-teams input{width:100%;background:none;border:0;color:var(--color-text);font-weight:800;padding:0}
+.auction-teams>article>strong{display:block;font-size:26px;margin-top:12px;font-family:var(--font-display);font-variant-numeric:tabular-nums}
+.auction-teams strong small{font-size:10px;color:var(--color-text-muted);font-family:var(--font-ui)}
+.auction-teams p{font-size:11px;color:var(--color-text-muted)}
+.auction-teams article button{display:flex;width:100%;gap:5px;align-items:center;background:transparent;border:0;padding:5px 0;text-align:left;font-size:12px;min-height:32px}
+.auction-teams em{margin-left:auto;color:var(--color-pitch);font-style:normal;font-variant-numeric:tabular-nums}
+
+/* Carosello mobile: una squadra alla volta con frecce, invece di comprimere la griglia. */
+.auction-teams-carousel-nav{display:none}
+
+@media(max-width:760px){
+  .auction-summary{grid-template-columns:1fr}
+  .auction-bar{display:block}
+  .auction-search{max-width:none}
+  .auction-history{margin-top:10px}
+  .auction-history button{flex:1 1 calc(50% - 8px)}
+  .auction-advice{display:grid;grid-template-columns:1fr;gap:12px}
+  .auction-advice>div{min-width:0}
+  .auction-advice label{min-width:0}
+  .auction-actions button{flex:1 1 100%}
+}
+
+@media(max-width:600px){
+  .auction-teams{display:block}
+  .auction-teams article{display:none}
+  .auction-teams article.mobile-active{display:block}
+  .auction-teams-carousel-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;padding:8px 4px;border-bottom:var(--border-hairline)}
+  .auction-teams-carousel-nav button{min-width:44px;min-height:44px;border:1px solid var(--color-border);border-radius:var(--radius-sm);background:var(--color-surface-raised);font-size:18px}
+  .auction-teams-carousel-nav button:disabled{opacity:.4;cursor:not-allowed}
+  .auction-teams-carousel-nav strong{font-weight:800;text-align:center}
+  .auction-teams-carousel-nav small{display:block;color:var(--color-text-muted);font-size:11px;font-weight:400}
+}

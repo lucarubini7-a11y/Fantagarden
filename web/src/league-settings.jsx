@@ -937,6 +937,7 @@ export function LeagueSettings({
             input(`Posti ${role}`, ["roster_slots", role], {
               type: "number",
               min: 1,
+              key: role,
             }),
           )}
         </div>

@@ -97,9 +97,12 @@ export function FixtureAdvisor({
                 <span>
                   <b>{player.nome}</b>
                   {badge && (
-                    <i className={`player-status-badge ${badge.className}`} title={badge.title}>
-                      {badge.emoji} {badge.label}
-                    </i>
+                    <i
+                      className={`player-status-badge ${badge.className}`}
+                      role="img"
+                      aria-label={badge.ariaLabel}
+                      title={badge.title}
+                    />
                   )}
                   <small>
                     {player.squadra}

@@ -5,6 +5,7 @@ import RandomAuctionView from "./random-auction.jsx";
 import { AiAdvisorPanel } from "./ai-advisor.jsx";
 import { FixtureAdvisor } from "./fixture-advisor.jsx";
 import { fetchPlayerStatus, formatPlayerStatusUpdatedAt, playerStatusBadge } from "./player-status-client.js";
+import { TeamBadge } from "./team-badge.jsx";
 import { LeagueSettings } from "./league-settings.jsx";
 import { normalizeRules } from "./league-rules.js";
 import { activeNominationRole } from "./auction-nomination.js";
@@ -511,7 +512,7 @@ function SeasonReport({ season, data, openPlayer, onRerun, isSimulating, simulat
                 <span>
                   <b>{player.nome}</b>
                   <small>
-                    {player.squadra} · {formatTier(player.guida_asta_fascia)}
+                    <TeamBadge team={player.squadra} size={14} /> {player.squadra} · {formatTier(player.guida_asta_fascia)}
                   </small>
                 </span>
                 <em>{player.fvm_scaled}</em>
@@ -646,7 +647,7 @@ function Overview({ data, openPlayer, openTeam }) {
                 <div>
                   <strong>{player.nome}</strong>
                   <small>
-                    {player.squadra} · {formatTier(player.guida_asta_fascia)}
+                    <TeamBadge team={player.squadra} size={14} /> {player.squadra} · {formatTier(player.guida_asta_fascia)}
                   </small>
                 </div>
                 <em>{player.fvm_scaled}</em>
@@ -669,7 +670,9 @@ function Overview({ data, openPlayer, openTeam }) {
                   <span className={"role " + player.ruolo}>{player.ruolo}</span>
                   <div>
                     <strong>{player.nome}</strong>
-                    <small>{player.squadra}</small>
+                    <small>
+                      <TeamBadge team={player.squadra} size={14} /> {player.squadra}
+                    </small>
                   </div>
                   <span className="status muted">RECUPERO</span>
                 </button>
@@ -691,7 +694,9 @@ function Overview({ data, openPlayer, openTeam }) {
         <div>
           {data.teams.map((team) => (
             <button key={team.squadra} onClick={() => openTeam(team.squadra)}>
-              <strong>{team.squadra}</strong>
+              <strong>
+                <TeamBadge team={team.squadra} size={20} /> {team.squadra}
+              </strong>
               <small>
                 ATT {team.rating_att}/10 · DIF {team.rating_dif}/10
               </small>
@@ -762,7 +767,7 @@ function PlayersView({ data, rules, selected, setSelected }) {
                 <i className={"role " + p.ruolo}>{p.ruolo}</i>
                 <b>{p.nome}</b>
                 <small>
-                  {p.squadra} · {formatTier(p.guida_asta_fascia)}
+                  <TeamBadge team={p.squadra} size={14} /> {p.squadra} · {formatTier(p.guida_asta_fascia)}
                 </small>
               </span>
               <span className={"status " + statusClass(p.disponibilita.status)}>
@@ -792,7 +797,7 @@ function PlayerDetail({ player, valuation }) {
       </div>
       <h2>{player.nome}</h2>
       <p>
-        {player.squadra} · Mantra {player.ruoli_mantra || "n/d"}
+        <TeamBadge team={player.squadra} size={16} /> {player.squadra} · Mantra {player.ruoli_mantra || "n/d"}
       </p>
       <div className="projection">
         <div>
@@ -935,7 +940,7 @@ function TargetsView({ data, rules, profileId, openPlayer }) {
               <i className={"role " + p.ruolo}>{p.ruolo}</i>
               <b>{p.nome}</b>
               <small>
-                {p.squadra} · {formatTier(p.guida_asta_fascia)}
+                <TeamBadge team={p.squadra} size={14} /> {p.squadra} · {formatTier(p.guida_asta_fascia)}
               </small>
               <em>+ Aggiungi</em>
             </button>
@@ -963,7 +968,7 @@ function TargetsView({ data, rules, profileId, openPlayer }) {
                   <span>
                     <b>{player.nome}</b>
                     <small>
-                      {player.squadra} · {formatTier(player.guida_asta_fascia)}
+                      <TeamBadge team={player.squadra} size={14} /> {player.squadra} · {formatTier(player.guida_asta_fascia)}
                     </small>
                   </span>
                   <em>{valuation.normalizedFvm(player).toFixed(1)}</em>
@@ -1043,7 +1048,7 @@ function TeamsView({ data, selectedTeam, setSelectedTeam, openPlayer }) {
             key={t.squadra}
             onClick={() => setSelectedTeam(t.squadra)}
           >
-            {t.squadra}
+            <TeamBadge team={t.squadra} size={18} /> {t.squadra}
           </button>
         ))}
       </div>
@@ -1052,7 +1057,9 @@ function TeamsView({ data, selectedTeam, setSelectedTeam, openPlayer }) {
           <span className="eyebrow">
             {team.coppa_europea || "NESSUNA COPPA"}
           </span>
-          <h2>{team.squadra}</h2>
+          <h2>
+            <TeamBadge team={team.squadra} size={32} /> {team.squadra}
+          </h2>
           <p>
             {team.promossa ? "Neopromossa" : "Serie A"} · Rating attacco{" "}
             {team.rating_att}/10 · difesa {team.rating_dif}/10
@@ -1171,7 +1178,9 @@ function SetPiecesView({ data, openPlayer }) {
       <div className="setpiece-board">
         {data.teams.map((team) => (
           <article key={team.squadra}>
-            <h2>{team.squadra}</h2>
+            <h2>
+              <TeamBadge team={team.squadra} size={20} /> {team.squadra}
+            </h2>
             {types.map((type) => {
               const item = data.set_pieces.find(
                 (p) => p.squadra === team.squadra && p.tipo === type,
@@ -1920,7 +1929,7 @@ function Auction({ data, openPlayer, rules, profileId, apiBase, playerStatus, on
                   <b>{p.nome}</b>
                   <PlayerStatusBadge players={playerStatus?.players} name={p.nome} />
                   <small>
-                    {p.squadra} · {p.fvm_scaled}
+                    <TeamBadge team={p.squadra} size={14} /> {p.squadra} · {p.fvm_scaled}
                   </small>
                 </button>
               ))}
@@ -1967,7 +1976,7 @@ function Auction({ data, openPlayer, rules, profileId, apiBase, playerStatus, on
               {player.nome} <PlayerStatusBadge players={playerStatus?.players} name={player.nome} />
             </h2>
             <p>
-              {player.squadra} · {formatTier(player.guida_asta_fascia)}
+              <TeamBadge team={player.squadra} size={14} /> {player.squadra} · {formatTier(player.guida_asta_fascia)}
             </p>
           </div>
           <div>

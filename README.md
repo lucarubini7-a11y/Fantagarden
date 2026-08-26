@@ -91,11 +91,13 @@ Non committare mai la chiave; usa una variabile d'ambiente o un `.env` locale
 
 ## Stato giocatori / infortuni (opzionale)
 
-Nella scheda **Asta live** compare un badge discreto accanto al nome di ogni
-giocatore infortunato (🔴 INF), diffidato (🟡 DIFF) o in dubbio (🟠 ?), nella
-ricerca, nelle rose delle squadre e nei consigli per reparto. Senza nulla di
-configurato non cambia nulla: nessun badge, nessun errore, il tool si
-comporta esattamente come prima.
+Nella scheda **Asta live** compare un piccolo "cartellino" colorato (nessun
+testo, solo colore e forma — rosso per infortunato, giallo per diffidato,
+giallo a righe per in dubbio, con l'informazione comunque disponibile a chi
+usa uno screen reader tramite `aria-label`) accanto al nome di ogni giocatore
+interessato, nella ricerca, nelle rose delle squadre e nei consigli per
+reparto. Senza nulla di configurato non cambia nulla: nessun badge, nessun
+errore, il tool si comporta esattamente come prima.
 
 Per attivarlo, esporta **una sola** delle due chiavi prima di avviare il
 server (Highlightly viene provato per primo; se assente si passa
@@ -123,6 +125,33 @@ arrivano, controlla `advisor/player_status.py` (funzioni `_fetch_highlightly`
 e `_fetch_api_football`) contro la documentazione corrente del provider: il
 resto del sistema (cache, endpoint locale, badge, fallback) non dipende da
 quei dettagli ed è già testato.
+
+## Loghi squadre Serie A (opzionale)
+
+Il tracker, le rose e i consigli per reparto mostrano il logo di ogni
+squadra di Serie A accanto al suo nome (fallback automatico a un cerchietto
+con le iniziali per qualunque squadra senza logo — mai un'icona rotta).
+
+I loghi vengono da [TheSportsDB](https://www.thesportsdb.com/) (chiave di
+test pubblica `3`) tramite uno script standalone, **non** dal server live:
+
+```bash
+.venv/bin/python advisor/fetch_team_badges.py
+```
+
+Va rilanciato **una tantum**, non ad ogni avvio del server: dopo il setup
+iniziale del progetto, o in seguito solo se cambia l'elenco delle squadre di
+Serie A in `data/raw/squadre.csv` (promozioni/retrocessioni). Scrive i PNG
+(ridimensionati a un massimo di 128x128) in `web/public/team-badges/` e la
+mappa `web/src/team-badges.json`: entrambi vanno committati come asset
+statici, non rigenerati ad ogni build.
+
+Lo script stampa un riepilogo tipo `18/20 loghi scaricati, mancanti: ...`.
+Se una squadra manca perché il suo nome su TheSportsDB non combacia con
+quello nel CSV, lo script stampa i nomi esatti che ha provato: aggiungi
+l'alias giusto alla tabella `ALIASES` in cima allo script e rilancialo. Le
+squadre ancora mancanti restano assenti da `team-badges.json` (nessun
+errore, nessun blocco: il frontend mostra il fallback a iniziali per loro).
 
 ## Verification
 

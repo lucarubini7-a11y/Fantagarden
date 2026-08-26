@@ -1,0 +1,21 @@
+.team-badge {
+  display: inline-block;
+  flex: 0 0 auto;
+  vertical-align: middle;
+  object-fit: contain;
+}
+.team-badge-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-pitch);
+  color: var(--color-pitch-text);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  line-height: 1;
+  /* Ring in --color-surface: invisible on the app's usual off-white
+     background, but keeps the badge legible when it lands on a dark
+     card (e.g. .player-detail) instead of picking a color per context. */
+  box-shadow: 0 0 0 2px var(--color-surface);
+}

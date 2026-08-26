@@ -38,6 +38,13 @@
                                           testo normale — è l'elemento
                                           "firma" del tool */
 
+  /* Scala tipografica — usare sempre queste invece di font-size arbitrari */
+  --text-xs: 12px;   /* meta-informazioni: timestamp, didascalie */
+  --text-sm: 14px;   /* testo secondario */
+  --text-base: 16px; /* testo normale */
+  --text-lg: 20px;   /* titoli di sezione/pannello */
+  --text-xl: 28px;   /* numeri di budget/crediti, sempre con --font-display */
+
   /* Spaziature (scala 4px) */
   --space-xs: 4px;
   --space-sm: 8px;
@@ -49,7 +56,15 @@
   --radius-sm: 4px;
   --radius-md: 8px;
   --border-hairline: 1px solid rgba(27, 94, 58, 0.2); /* verde campo tenue,
-                                          per i divisori, mai ombre pesanti */
+                                          per i divisori interni (righe di
+                                          una tabella), mai per un pannello
+                                          che "galleggia" sopra lo sfondo:
+                                          per quello vedi --shadow-float */
+  --shadow-float: 0 1px 3px rgba(26, 43, 34, 0.08); /* ombra leggerissima per
+                                          pannelli che appaiono sopra il
+                                          resto (es. AI advisor), al posto
+                                          di un bordo pesante */
+  --transition-fast: 150ms ease; /* hover/focus su bottoni ed elementi cliccabili */
 
   /*
    * Estensioni al sistema — coprono concetti che il set di token base non

@@ -1,10 +1,11 @@
 .ai-advisor-panel{margin:10px 0 16px}
-.ai-advisor-panel>button{border:1px solid var(--color-active-nomination-muted);background:var(--color-surface-raised);color:var(--color-text);border-radius:6px;padding:9px 14px;font-weight:700;min-height:44px}
+.ai-advisor-panel>button{border:1px solid var(--color-active-nomination-muted);background:var(--color-surface-raised);color:var(--color-text);border-radius:var(--radius-sm);padding:9px 14px;font-weight:700;min-height:44px;transition:background var(--transition-fast)}
 .ai-advisor-panel>button:hover:not(:disabled){background:color-mix(in srgb, var(--color-active-nomination-muted) 10%, var(--color-surface-raised))}
 .ai-advisor-panel>button:disabled{opacity:.5;cursor:not-allowed}
-.ai-advisor-loading{color:var(--color-text-muted);font-size:13px;font-style:italic}
-.ai-advisor-result{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--color-active-nomination-muted);border-radius:9px;background:color-mix(in srgb, var(--color-active-nomination-muted) 8%, var(--color-surface-raised));color:var(--color-text);padding:14px 16px}
+.ai-advisor-loading{color:var(--color-text-muted);font-size:var(--text-sm);font-style:italic}
+.ai-advisor-result{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--color-active-nomination-muted);border-radius:var(--radius-md);box-shadow:var(--shadow-float);background:color-mix(in srgb, var(--color-active-nomination-muted) 8%, var(--color-surface-raised));color:var(--color-text);padding:14px 16px}
 .ai-advisor-icon{font-size:20px;line-height:1}
-.ai-advisor-result p{margin:0;flex:1;line-height:1.5;font-size:13px}
-.ai-advisor-retry{border:1px solid var(--color-active-nomination-muted);background:transparent;color:var(--color-active-nomination-muted);border-radius:5px;padding:8px 9px;font-size:12px;margin-left:8px;min-height:36px}
-.ai-advisor-unavailable{display:flex;align-items:center;gap:8px;color:var(--color-text-muted);font-size:12px}
+.ai-advisor-result p{margin:0;flex:1;line-height:1.5;font-size:var(--text-sm)}
+.ai-advisor-retry{border:1px solid var(--color-active-nomination-muted);background:transparent;color:var(--color-active-nomination-muted);border-radius:var(--radius-sm);padding:8px 9px;font-size:var(--text-xs);margin-left:8px;min-height:36px;transition:background var(--transition-fast),color var(--transition-fast)}
+.ai-advisor-retry:hover{background:var(--color-active-nomination-muted);color:var(--color-surface-raised)}
+.ai-advisor-unavailable{display:flex;align-items:center;gap:8px;color:var(--color-text-muted);font-size:var(--text-xs)}

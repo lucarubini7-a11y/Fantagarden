@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { playerIdKey } from "./auction-state.js";
 import { scoreByUpcomingFixtures } from "./fixture-advisor.js";
 import { playerStatusBadge } from "./player-status-client.js";
+import { TeamBadge } from "./team-badge.jsx";
 
 const ROLE_LABELS = { P: "Portieri", D: "Difensori", C: "Centrocampisti", A: "Attaccanti" };
 const LABEL_CLASS = { facile: "good", medio: "caution", duro: "bad" };
@@ -104,15 +105,19 @@ export function FixtureAdvisor({
                       title={badge.title}
                     />
                   )}
-                  <small>
-                    {player.squadra}
+                  <small className="fixture-advisor-meta">
+                    <span className="fixture-advisor-team">
+                      <TeamBadge team={player.squadra} size={14} /> {player.squadra}
+                    </span>
                     {nextOpponents && (
-                      <>
-                        {" · "}
-                        {nextOpponents
-                          .map((f) => `${f.venue === "CASA" ? "vs" : "@"} ${f.opponent}`)
-                          .join(" · ")}
-                      </>
+                      <span className="fixture-advisor-opponents">
+                        {nextOpponents.map((fixture, index) => (
+                          <span className="fixture-advisor-opponent" key={index}>
+                            {fixture.venue === "CASA" ? "vs" : "@"}
+                            <TeamBadge team={fixture.opponent} size={12} /> {fixture.opponent}
+                          </span>
+                        ))}
+                      </span>
                     )}
                   </small>
                 </span>

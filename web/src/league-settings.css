@@ -51,9 +51,10 @@
 }
 .ls-errors {
   border: 1px solid var(--danger);
-  border-radius: 9px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-float);
   background: var(--color-red-card-tint);
-  padding: 14px 18px;
+  padding: var(--space-md) 18px;
   margin: 18px 0;
 }
 .ls-draft-banner {
@@ -62,12 +63,13 @@
   justify-content: space-between;
   gap: 12px;
   border: 1px solid var(--color-yellow-card);
-  border-radius: 9px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-float);
   background: var(--color-yellow-card-tint);
   color: var(--ink);
-  padding: 12px 18px;
+  padding: 12px var(--space-md);
   margin: 18px 0;
-  font-size: 13px;
+  font-size: var(--text-sm);
 }
 .ls-errors ul {
   margin: 8px 0 0;
@@ -78,12 +80,12 @@
   margin: 28px 0;
   padding: 26px 22px 24px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: var(--panel);
 }
 .league-settings legend {
   padding: 0 8px;
-  font-size: 20px;
+  font-size: var(--text-lg);
   font-weight: 800;
 }
 .league-settings legend span {
@@ -94,7 +96,7 @@
   margin-right: 8px;
   background: var(--lime);
   color: var(--lime-ink);
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   font:
     700 12px ui-monospace,
     monospace;
@@ -124,7 +126,7 @@
   width: 100%;
   min-height: 44px;
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 8px 10px;
   color: var(--ink);
   background: var(--input);
@@ -147,7 +149,7 @@
   grid-column: 1 / -1;
   padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   background: var(--panel-raised);
 }
 .ls-range-label {
@@ -242,7 +244,7 @@
   justify-content: space-between;
   gap: 6px 18px;
   color: var(--ink);
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 800;
 }
 .ls-range p {
@@ -259,15 +261,15 @@
 }
 .ls-subheading h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: var(--text-base);
 }
 .ls-subheading h4 {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
 .ls-subheading span {
   color: var(--muted);
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
 .ls-inline-actions {
   display: flex;
@@ -277,12 +279,20 @@
 .ls-text-button,
 .ls-remove {
   border: 0;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--lime);
   text-decoration: none;
   font-weight: 800;
   padding: 4px;
   min-height: 44px;
+  transition: background var(--transition-fast);
+}
+.ls-text-button:hover:not(:disabled) {
+  background: var(--color-pitch-tint);
+}
+.ls-remove:hover:not(:disabled) {
+  background: var(--color-red-card-tint);
 }
 .ls-text-button:disabled,
 .ls-remove:disabled {
@@ -305,7 +315,7 @@
 .ls-source-identity span {
   overflow: hidden;
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 400;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -316,7 +326,7 @@
   gap: 7px;
   min-width: 112px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 800;
 }
 .ls-source-status i {
@@ -349,13 +359,14 @@
   justify-content: center;
   overflow: hidden;
   border: 1px solid var(--color-border);
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   padding: 8px 14px;
   background: var(--color-pitch);
   color: var(--color-pitch-text);
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 800;
+  transition: background var(--transition-fast);
 }
 .ls-upload:hover {
   background: var(--color-pitch-hover);
@@ -378,11 +389,11 @@
 .ls-team label,
 .ls-payouts label,
 .ls-tier label {
-  font-size: 13px;
+  font-size: var(--text-sm);
 }
 .ls-field-help {
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 400;
   line-height: 1.35;
 }
@@ -455,14 +466,14 @@
 .ls-formation-help {
   margin: 12px 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 700;
 }
 .ls-static-rule {
   margin-top: 24px;
   padding: 16px 18px;
   border: 1px solid var(--line);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   background: var(--panel-raised);
 }
 .ls-static-rule strong {
@@ -472,7 +483,7 @@
   max-width: 760px;
   margin: 5px 0 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: var(--text-sm);
   line-height: 1.5;
 }
 .ls-static-rule code {
@@ -490,7 +501,7 @@
 }
 .ls-options .ls-check {
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 7px 10px;
   background: var(--panel-raised);
 }
@@ -500,9 +511,9 @@
 }
 .ls-choice-card {
   margin-top: 22px;
-  padding: 16px;
+  padding: var(--space-md);
   border: 1px solid var(--line);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   background: var(--panel-raised);
 }
 .ls-choice-card .ls-label {
@@ -521,7 +532,7 @@
   align-items: start;
   padding: 9px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--panel);
 }
 .ls-invalid-choice {
@@ -536,15 +547,19 @@
 }
 .ls-order-actions button {
   border: 1px solid var(--line);
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   background: var(--color-surface-raised);
   color: var(--ink);
   padding: 3px 8px;
   font: inherit;
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 800;
   min-height: 32px;
   min-width: 32px;
+  transition: background var(--transition-fast);
+}
+.ls-order-actions button:hover:not(:disabled) {
+  background: var(--color-pitch-tint);
 }
 .ls-order-actions button:focus-visible {
   outline: 3px solid var(--focus-ring-color);
@@ -552,7 +567,7 @@
 }
 .ls-toggle {
   margin-top: 24px;
-  font-size: 16px;
+  font-size: var(--text-base);
 }
 .ls-toggle + .ls-grid,
 .ls-choice-card + .ls-grid {
@@ -573,16 +588,17 @@
   flex: 1 1 280px;
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
 .ls-actions button {
   min-height: 46px;
   border: 1px solid var(--lime);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   padding: 10px 18px;
   background: var(--lime);
   color: var(--lime-ink);
   font-weight: 900;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 .ls-actions .ls-generate {
   border-color: var(--color-border);

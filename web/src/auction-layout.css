@@ -2,24 +2,24 @@
 .auction-search { position: relative; max-width: 430px; flex: 1; }
 .auction-results { position: absolute; z-index: 2; width: 100%; max-height: 270px; overflow: auto; }
 .auction-history { display: flex; align-self: flex-end; gap: 8px; }
-.auction-history button { min-height: 44px; padding: 0 14px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface-raised); color: var(--color-text); font-weight: 700; letter-spacing: .01em; transition: background .15s ease, border-color .15s ease, transform .15s ease; }
+.auction-history button { min-height: 44px; padding: 0 14px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-raised); color: var(--color-text); font-weight: 700; letter-spacing: .01em; transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast); }
 .auction-history button:hover:not(:disabled) { background: var(--color-pitch-tint); border-color: var(--color-pitch); transform: translateY(-1px); }
 .auction-history button:disabled { background: var(--color-disabled-bg); border-color: var(--color-border); color: var(--color-disabled-text); opacity: 1; cursor: not-allowed; }
 .auction-history .flush { border-color: var(--color-red-card); background: var(--color-red-card-tint); color: var(--color-text); }
 .auction-history .flush:hover { background: var(--color-red-card); color: var(--color-red-card-text); border-color: var(--color-red-card); }
-.auction-owner { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 20px 0 -10px; color: var(--color-pitch); font-size: 12px; font-weight: 700; }
-.auction-owner select { min-width: 180px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface-raised); color: var(--color-text); padding: 7px 9px; font-weight: 700; min-height: 44px; }
+.auction-owner { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 20px 0 -10px; color: var(--color-pitch); font-size: var(--text-xs); font-weight: 700; }
+.auction-owner select { min-width: 180px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-raised); color: var(--color-text); padding: 7px 9px; font-weight: 700; min-height: 44px; }
 .auction-owner small { color: var(--color-text-muted); font-weight: 400; }
 .auction-advice { display: grid !important; grid-template-columns: minmax(145px, 1.1fr) minmax(135px, .8fr) minmax(190px, 1fr) minmax(150px, .75fr) auto; align-items: end !important; gap: 14px !important; }
 .auction-advice > div, .auction-advice label { min-width: 0; }
-.auction-field { color: var(--color-text) !important; font-size: 13px !important; font-weight: 800 !important; }
+.auction-field { color: var(--color-text) !important; font-size: var(--text-sm) !important; font-weight: 800 !important; }
 .auction-field select, .auction-field input { height: 44px; border-color: var(--color-border) !important; color: var(--color-text) !important; background: var(--color-surface-raised) !important; }
 /* Keep the buyer input level with the price input and its validation hint. */
 .auction-field--reserved-help::after { content: ""; display: block; height: 13px; margin-top: 5px; }
 .auction-actions { align-self: start; margin-top: 30px; justify-content: flex-end; }
 .auction-actions button { white-space: nowrap; }
-.starting-credits { display: block; margin-top: 14px !important; color: var(--color-pitch) !important; font-size: 12px !important; }
-.starting-credits input { display: block; width: 100%; margin-top: 5px; border: 1px solid var(--color-border) !important; border-radius: 5px !important; background: var(--color-surface-raised) !important; color: var(--color-text) !important; padding: 7px !important; font-weight: 750; font-family: var(--font-display); font-variant-numeric: tabular-nums; }
+.starting-credits { display: block; margin-top: 14px !important; color: var(--color-pitch) !important; font-size: var(--text-xs) !important; }
+.starting-credits input { display: block; width: 100%; margin-top: 5px; border: 1px solid var(--color-border) !important; border-radius: var(--radius-sm) !important; background: var(--color-surface-raised) !important; color: var(--color-text) !important; padding: 7px !important; font-weight: 750; font-family: var(--font-display); font-variant-numeric: tabular-nums; }
 
 @media (max-width: 1050px) {
   .auction-advice { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }

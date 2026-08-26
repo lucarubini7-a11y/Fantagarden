@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import RandomAuctionView from "./random-auction.jsx";
 import { AiAdvisorPanel } from "./ai-advisor.jsx";
+import { FixtureAdvisor } from "./fixture-advisor.jsx";
 import { LeagueSettings } from "./league-settings.jsx";
 import { normalizeRules } from "./league-rules.js";
 import { activeNominationRole } from "./auction-nomination.js";
@@ -1916,6 +1917,14 @@ function Auction({ data, openPlayer, rules, profileId, apiBase }) {
           </button>
         </div>
       </div>
+      <FixtureAdvisor
+        players={data.players}
+        teams={data.teams}
+        assigned={state.assigned}
+        activeRole={activeRole}
+        defaultFromMatchday={data.calendario_lega?.matchdays?.[0]?.serie_a_matchday ?? 1}
+        openPlayer={openPlayer}
+      />
       {player && (
         <section className="auction-advice">
           <div>

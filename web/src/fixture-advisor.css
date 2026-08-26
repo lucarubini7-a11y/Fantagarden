@@ -1,0 +1,19 @@
+.fixture-advisor{background:#151d18;border:1px solid #3c4a41;border-radius:10px;padding:16px;margin-bottom:16px}
+.fixture-advisor-header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}
+.fixture-advisor-header h3{margin:0;font-size:16px}
+.fixture-advisor-controls{display:flex;gap:12px;flex-wrap:wrap}
+.fixture-advisor-controls label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#aab6aa}
+.fixture-advisor-controls select,.fixture-advisor-controls input{border:1px solid #536358;background:#18221d;color:#eef4ec;border-radius:6px;padding:6px 8px;width:90px}
+.fixture-advisor-controls select{width:auto}
+.fixture-advisor-empty{color:#8a978a;font-size:13px;margin:0}
+.fixture-advisor-list{display:grid;gap:6px}
+.fixture-advisor-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;width:100%;text-align:left;border:0;border-top:1px solid #29382f;background:transparent;padding:9px 4px}
+.fixture-advisor-row:first-child{border-top:0}
+.fixture-advisor-row:hover{background:#1d2821}
+.fixture-advisor-row small{display:block;color:#aab6aa;margin-top:2px;font-size:11px}
+.fixture-advisor-row em{font-style:normal;color:#c7ef8f;font-size:15px}
+.fixture-tag{border-radius:999px;padding:3px 9px;font-size:10px;font-weight:800;text-transform:uppercase}
+.fixture-tag.good{background:#224a32;color:#bdffc9}
+.fixture-tag.caution{background:#5a4821;color:#ffdf8f}
+.fixture-tag.bad{background:#4a2323;color:#ffbdbd}
+@media(max-width:760px){.fixture-advisor-row{grid-template-columns:1fr auto}.fixture-tag{grid-column:2;justify-self:end}}

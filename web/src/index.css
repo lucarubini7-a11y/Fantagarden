@@ -11,6 +11,7 @@
 @import "./targets.css" layer(components);
 @import "./session.css" layer(components);
 @import "./ai-advisor.css" layer(components);
+@import "./fixture-advisor.css" layer(components);
 
 @layer components {
   .auction-advice {

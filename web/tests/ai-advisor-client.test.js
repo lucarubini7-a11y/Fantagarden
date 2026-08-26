@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   buildAdvisorContext,
   contextFromAuctionState,
+  contextFromNominationSuggestions,
   fetchAdvisorAdvice,
   topAlternatives,
 } from "../src/ai-advisor-client.js";
@@ -90,6 +91,31 @@ test("contextFromAuctionState treats an empty price as no current bid", () => {
   });
   assert.equal(context.current_bid, null);
   assert.equal(context.player.prezzo_max_consigliato, null);
+});
+
+test("contextFromNominationSuggestions never includes an opponent's roster or the pre-existing eval fields", () => {
+  const context = contextFromNominationSuggestions({
+    suggestions: [
+      {
+        player: players[0],
+        score: 60,
+        reasons: ["È un tuo obiettivo e la concorrenza per questo ruolo si sta esaurendo."],
+      },
+    ],
+    myTeam: { budgetResidual: 300, slotsByRole: { A: 2 } },
+    opponentTeams: [
+      { name: "Rivale", budgetResidual: 150, slotsByRole: { A: 1 }, roster: [{ nome: "QuestoNonDeveApparire" }] },
+    ],
+  });
+  assert.equal(context.mode, "suggest_nomination");
+  assert.deepEqual(context.my_team, { budget_residuo: 300, slot_rimasti_per_ruolo: { A: 2 } });
+  assert.deepEqual(context.other_teams, [
+    { nome_squadra: "Rivale", budget_residuo: 150, slot_rimasti_per_ruolo: { A: 1 } },
+  ]);
+  assert.equal(JSON.stringify(context).includes("QuestoNonDeveApparire"), false);
+  assert.equal(context.top_suggestions[0].player.nome, "Osimhen");
+  assert.equal(context.top_suggestions[0].score, 60);
+  assert.equal("current_bid" in context, false);
 });
 
 test("fetchAdvisorAdvice resolves to success on an available response", async () => {

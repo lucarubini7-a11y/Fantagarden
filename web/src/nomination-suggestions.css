@@ -1,0 +1,14 @@
+.nomination-suggestions{background:var(--color-surface-raised);border:var(--border-hairline);border-radius:var(--radius-md);padding:var(--space-md);margin:var(--space-lg) 0}
+.nomination-suggestions summary{cursor:pointer;font-weight:700;font-size:var(--text-lg);list-style:revert;transition:color var(--transition-fast)}
+.nomination-suggestions summary:hover{color:var(--color-pitch)}
+.nomination-suggestions-empty{margin:var(--space-sm) 0 0;color:var(--color-text-muted);font-size:var(--text-sm)}
+.nomination-suggestions-list{display:grid;gap:6px;margin:var(--space-md) 0;padding:0;list-style:none}
+.nomination-suggestion-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:9px 4px;border-top:var(--border-hairline);transition:background var(--transition-fast)}
+.nomination-suggestion-row:first-child{border-top:0}
+.nomination-suggestion-row:hover{background:var(--color-pitch-tint)}
+.nomination-suggestion-name small{display:flex;align-items:center;gap:5px;color:var(--color-text-muted);margin-top:2px;font-size:var(--text-xs)}
+.nomination-signal-badge{border-radius:var(--radius-sm);padding:3px 8px;font-size:10px;font-weight:600;white-space:nowrap;cursor:help}
+.nomination-signal-readyTarget{background:var(--color-pitch);color:var(--color-pitch-text)}
+.nomination-signal-decoy{background:var(--color-yellow-card);color:var(--color-yellow-card-text)}
+.nomination-signal-hiddenGem{background:var(--color-active-nomination-muted);color:var(--color-surface-raised)}
+@media(max-width:640px){.nomination-suggestion-row{grid-template-columns:auto 1fr;grid-template-areas:"role name" "badge badge"}.nomination-suggestion-row i{grid-area:role}.nomination-suggestion-name{grid-area:name}.nomination-signal-badge{grid-area:badge;justify-self:start;margin-top:4px}}

@@ -24,8 +24,9 @@
 .auction-search{position:relative;min-width:430px}
 .auction-search input{width:100%}
 .auction-search>div{position:absolute;z-index:2;width:100%;background:var(--color-surface-raised);border:1px solid var(--color-border);border-radius:var(--radius-sm);box-shadow:var(--shadow-float);overflow:hidden}
-.auction-search>div button{display:grid;grid-template-columns:26px 1fr auto;width:100%;gap:7px;background:var(--color-surface-raised);border:0;border-bottom:var(--border-hairline);padding:9px;text-align:left;transition:background var(--transition-fast)}
-.auction-search>div button:hover{background:var(--color-pitch-tint)}
+.auction-result-row{display:flex;align-items:center;border-bottom:var(--border-hairline);transition:background var(--transition-fast)}
+.auction-result-row:hover{background:var(--color-pitch-tint)}
+.auction-search>div .auction-result-row button{flex:1;display:grid;grid-template-columns:26px 1fr auto;width:100%;gap:7px;background:transparent;border:0;padding:9px;text-align:left}
 .auction-search small{color:var(--color-text-muted)}
 .auction-bar>button{border:1px solid var(--color-border);background:var(--color-surface-raised);border-radius:var(--radius-sm);padding:8px 12px;min-height:44px;transition:background var(--transition-fast),border-color var(--transition-fast)}
 .auction-bar>button:hover{background:var(--color-pitch-tint);border-color:var(--color-pitch)}

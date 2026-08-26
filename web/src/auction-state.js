@@ -46,6 +46,19 @@ export const legalMaxBid = (team, rules) => {
   return Math.max(0, team.credits - Math.max(0, openSlots - 1) * rules.auction.reserve);
 };
 
+/** Which team index is "mine" by default, per the league profile's configured user_team. */
+export const resolveUserTeamIndex = (rules) => {
+  const configuredUserIndex = Number(rules.userTeam);
+  return Math.max(
+    0,
+    Number.isInteger(configuredUserIndex) &&
+      configuredUserIndex >= 0 &&
+      configuredUserIndex < rules.participants
+      ? configuredUserIndex
+      : (rules.teamNames?.indexOf(rules.userTeam) ?? -1),
+  );
+};
+
 export const isValidBid = (price, team, rules) => {
   const value = integer(price, rules.auction.minPrice);
   return (

@@ -75,6 +75,62 @@ class BuildAdvisorPromptTests(unittest.TestCase):
         self.assertIn("Lucca", prompt)
         self.assertIn("italiano", prompt.lower())
 
+    def test_default_mode_is_evaluate_candidate(self):
+        without_mode = build_advisor_prompt(CONTEXT)
+        with_explicit_mode = build_advisor_prompt({**CONTEXT, "mode": "evaluate_candidate"})
+        self.assertEqual(without_mode, with_explicit_mode)
+
+
+SUGGEST_NOMINATION_CONTEXT = {
+    "mode": "suggest_nomination",
+    "my_team": {"budget_residuo": 300, "slot_rimasti_per_ruolo": {"A": 2, "D": 3}},
+    "other_teams": [
+        {"nome_squadra": "Squadra 2", "budget_residuo": 150, "slot_rimasti_per_ruolo": {"A": 1}},
+        {"nome_squadra": "Squadra 3", "budget_residuo": 90, "slot_rimasti_per_ruolo": {"A": 0}},
+    ],
+    "top_suggestions": [
+        {
+            "player": {"nome": "Osimhen", "ruolo": "A", "squadra": "Napoli"},
+            "score": 60,
+            "reasons": ["È un tuo obiettivo e la concorrenza per questo ruolo si sta esaurendo."],
+        },
+        {
+            "player": {"nome": "Lucca", "ruolo": "A", "squadra": "Udinese"},
+            "score": 45,
+            "reasons": ["Nominalo per far spendere Squadra 2 e Squadra 3: hanno ancora slot vuoti e budget alto."],
+        },
+    ],
+}
+
+
+class BuildSuggestNominationPromptTests(unittest.TestCase):
+    def test_prompt_lists_the_precomputed_suggestions(self):
+        prompt = build_advisor_prompt(SUGGEST_NOMINATION_CONTEXT)
+        self.assertIn("Osimhen", prompt)
+        self.assertIn("Lucca", prompt)
+        self.assertIn("concorrenza per questo ruolo si sta esaurendo", prompt)
+
+    def test_prompt_never_lists_opponent_rosters(self):
+        context = {
+            **SUGGEST_NOMINATION_CONTEXT,
+            "other_teams": [
+                {
+                    "nome_squadra": "Squadra 2",
+                    "budget_residuo": 150,
+                    "slot_rimasti_per_ruolo": {"A": 1},
+                    "giocatori_gia_presi": ["QuestoNonDeveApparire"],
+                }
+            ],
+        }
+        prompt = build_advisor_prompt(context)
+        self.assertNotIn("QuestoNonDeveApparire", prompt)
+        self.assertIn("solo aggregati", prompt.lower())
+
+    def test_prompt_asks_for_a_single_pick_in_italian(self):
+        prompt = build_advisor_prompt(SUGGEST_NOMINATION_CONTEXT)
+        self.assertIn("italiano", prompt.lower())
+        self.assertIn("UN solo nome", prompt)
+
 
 class CallAdvisorTests(unittest.TestCase):
     def test_missing_api_key_returns_unavailable_without_raising(self):

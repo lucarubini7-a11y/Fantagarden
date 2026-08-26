@@ -4,6 +4,8 @@ import "./index.css";
 import RandomAuctionView from "./random-auction.jsx";
 import { AiAdvisorPanel } from "./ai-advisor.jsx";
 import { FixtureAdvisor } from "./fixture-advisor.jsx";
+import { NominationSuggestions } from "./nomination-suggestions.jsx";
+import { TargetStar } from "./target-star.jsx";
 import { fetchPlayerStatus, formatPlayerStatusUpdatedAt, playerStatusBadge } from "./player-status-client.js";
 import { TeamBadge } from "./team-badge.jsx";
 import { LeagueSettings } from "./league-settings.jsx";
@@ -15,19 +17,20 @@ import {
   legalMaxBid,
   playerIdKey,
   rehydrateAuction,
+  resolveUserTeamIndex,
   serializeAuction,
   slotsLeft,
 } from "./auction-state.js";
 import {
+  TARGET_PRIORITIES,
   addTarget,
-  emptyTargets,
   isTargeted,
-  rehydrateTargets,
   removeTarget,
-  serializeTargets,
   setTargetMaxBid,
   setTargetNote,
-  targetsStorageKey,
+  setTargetPriority,
+  targetStatus,
+  useTargets,
 } from "./targets-state.js";
 import {
   SESSION_SCHEMA_VERSION,
@@ -867,24 +870,21 @@ function PlayerDetail({ player, valuation }) {
   );
 }
 
+const PRIORITY_LABELS = { alta: "Alta", media: "Media", bassa: "Bassa" };
+const PRIORITY_SECTIONS = [
+  { priority: "alta", title: "Priorità alta" },
+  { priority: "media", title: "Priorità media" },
+  { priority: "bassa", title: "Priorità bassa" },
+];
+
 function TargetsView({ data, rules, profileId, openPlayer }) {
   const valuation = createRoleValuation(data.players, rules);
-  const storageKey = targetsStorageKey(profileId);
-  const [targets, setTargets] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
-      return rehydrateTargets(saved, data.players);
-    } catch {
-      return emptyTargets();
-    }
-  });
+  const myTeamIndex = resolveUserTeamIndex(rules);
+  const [targets, setTargets] = useTargets(profileId, data.players);
   const [auctionState] = useState(() => {
     const { envelope } = loadActiveEnvelope(profileId);
     return envelope ? rehydrateAuction(envelope.state.auction, data.players, rules) : null;
   });
-  useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(serializeTargets(targets)));
-  }, [targets, storageKey]);
   const [query, setQuery] = useState("");
   const [role, setRole] = useState("TUTTI");
   const suggestions =
@@ -898,12 +898,19 @@ function TargetsView({ data, rules, profileId, openPlayer }) {
           )
           .slice(0, 8)
       : [];
-  const targetPlayers = Object.keys(targets)
+  const byRoleThenValue = (a, b) =>
+    a.player.ruolo.localeCompare(b.player.ruolo) ||
+    valuation.normalizedFvm(b.player) - valuation.normalizedFvm(a.player);
+  const withStatus = Object.keys(targets)
     .map((id) => data.players.find((p) => playerIdKey(p.id) === id))
     .filter(Boolean)
-    .sort(
-      (a, b) => a.ruolo.localeCompare(b.ruolo) || valuation.normalizedFvm(b) - valuation.normalizedFvm(a),
-    );
+    .map((player) => {
+      const taken = auctionState?.assigned[playerIdKey(player.id)];
+      return { player, meta: targets[playerIdKey(player.id)], taken, status: targetStatus(taken, myTeamIndex) };
+    });
+  const activeTargets = withStatus.filter((entry) => entry.status === "active");
+  const achievedTargets = withStatus.filter((entry) => entry.status === "achieved");
+  const lostTargets = withStatus.filter((entry) => entry.status === "lost");
   const add = (player) => {
     setTargets((current) => addTarget(current, player.id));
     setQuery("");
@@ -931,7 +938,9 @@ function TargetsView({ data, rules, profileId, openPlayer }) {
             <option key={r}>{r}</option>
           ))}
         </select>
-        <span>{targetPlayers.length} obiettivi</span>
+        <span>
+          {activeTargets.length} {activeTargets.length === 1 ? "obiettivo attivo" : "obiettivi attivi"}
+        </span>
       </div>
       {suggestions.length > 0 && (
         <div className="target-suggestions">
@@ -947,81 +956,138 @@ function TargetsView({ data, rules, profileId, openPlayer }) {
           ))}
         </div>
       )}
-      {targetPlayers.length === 0 ? (
+      {activeTargets.length === 0 ? (
         <p className="targets-empty">
-          Nessun obiettivo ancora. Cerca un giocatore qui sopra per
+          Nessun obiettivo attivo. Cerca un giocatore qui sopra per
           aggiungerlo alla lista.
         </p>
       ) : (
-        <div className="target-list">
-          {targetPlayers.map((player) => {
-            const meta = targets[playerIdKey(player.id)];
-            const taken = auctionState?.assigned[playerIdKey(player.id)];
-            const takenBy = taken ? auctionState.teams[taken.owner] : null;
-            return (
-              <article key={player.id} className="target-row">
-                <button
-                  className="target-player"
-                  onClick={() => openPlayer(player)}
-                >
-                  <i className={"role " + player.ruolo}>{player.ruolo}</i>
-                  <span>
-                    <b>{player.nome}</b>
-                    <small>
-                      <TeamBadge team={player.squadra} size={14} /> {player.squadra} · {formatTier(player.guida_asta_fascia)}
-                    </small>
-                  </span>
-                  <em>{valuation.normalizedFvm(player).toFixed(1)}</em>
-                </button>
-                <label>
-                  Prezzo max
-                  <input
-                    type="number"
-                    min="1"
-                    inputMode="numeric"
-                    value={meta.maxBid ?? ""}
-                    onChange={(e) =>
-                      setTargets((current) =>
-                        setTargetMaxBid(current, player.id, e.target.value),
-                      )
-                    }
-                    placeholder="cr."
+        PRIORITY_SECTIONS.map(({ priority, title }) => {
+          const entries = activeTargets
+            .filter((entry) => entry.meta.priority === priority)
+            .sort(byRoleThenValue);
+          if (!entries.length) return null;
+          return (
+            <div className="target-priority-group" key={priority}>
+              <h2 className={`target-priority-title target-priority-${priority}`}>
+                {title} <span>{entries.length}</span>
+              </h2>
+              <div className="target-list">
+                {entries.map((entry) => (
+                  <TargetRow
+                    key={entry.player.id}
+                    entry={entry}
+                    editable
+                    openPlayer={openPlayer}
+                    setTargets={setTargets}
+                    valuation={valuation}
                   />
-                </label>
-                <label>
-                  Nota
-                  <input
-                    value={meta.note}
-                    onChange={(e) =>
-                      setTargets((current) =>
-                        setTargetNote(current, player.id, e.target.value),
-                      )
-                    }
-                    placeholder="es. solo se libero il ruolo"
-                  />
-                </label>
-                {takenBy ? (
-                  <span className="target-status taken">
-                    Preso da {takenBy.name} · {taken.price} cr.
-                  </span>
-                ) : (
-                  <span className="target-status free">Libero</span>
-                )}
-                <button
-                  className="target-remove"
-                  onClick={() =>
-                    setTargets((current) => removeTarget(current, player.id))
-                  }
-                  aria-label={`Rimuovi ${player.nome} dagli obiettivi`}
-                >
-                  Rimuovi
-                </button>
-              </article>
-            );
-          })}
-        </div>
+                ))}
+              </div>
+            </div>
+          );
+        })
+      )}
+      {achievedTargets.length > 0 && (
+        <details className="target-history">
+          <summary>Raggiunti ({achievedTargets.length})</summary>
+          <div className="target-list">
+            {achievedTargets.sort(byRoleThenValue).map((entry) => (
+              <TargetRow key={entry.player.id} entry={entry} openPlayer={openPlayer} valuation={valuation} />
+            ))}
+          </div>
+        </details>
+      )}
+      {lostTargets.length > 0 && (
+        <details className="target-history">
+          <summary>Persi ({lostTargets.length})</summary>
+          <div className="target-list">
+            {lostTargets.sort(byRoleThenValue).map((entry) => (
+              <TargetRow
+                key={entry.player.id}
+                entry={entry}
+                openPlayer={openPlayer}
+                valuation={valuation}
+                takenByName={auctionState?.teams[entry.taken.owner]?.name}
+              />
+            ))}
+          </div>
+        </details>
       )}
     </section>
+  );
+}
+
+function TargetRow({ entry, editable, openPlayer, setTargets, takenByName, valuation }) {
+  const { player, meta, taken, status } = entry;
+  return (
+    <article className={"target-row" + (editable ? "" : " target-row-compact")}>
+      <button className="target-player" onClick={() => openPlayer(player)}>
+        <i className={"role " + player.ruolo}>{player.ruolo}</i>
+        <span>
+          <b>{player.nome}</b>
+          <small>
+            <TeamBadge team={player.squadra} size={14} /> {player.squadra} · {formatTier(player.guida_asta_fascia)}
+          </small>
+        </span>
+        {valuation && <em>{valuation.normalizedFvm(player).toFixed(1)}</em>}
+      </button>
+      {editable ? (
+        <>
+          <label>
+            Priorità
+            <select
+              value={meta.priority}
+              onChange={(e) =>
+                setTargets((current) => setTargetPriority(current, player.id, e.target.value))
+              }
+            >
+              {TARGET_PRIORITIES.map((priority) => (
+                <option key={priority} value={priority}>
+                  {PRIORITY_LABELS[priority]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Prezzo max
+            <input
+              type="number"
+              min="1"
+              inputMode="numeric"
+              value={meta.maxBid ?? ""}
+              onChange={(e) => setTargets((current) => setTargetMaxBid(current, player.id, e.target.value))}
+              placeholder="cr."
+            />
+          </label>
+          <label>
+            Nota
+            <input
+              value={meta.note}
+              onChange={(e) => setTargets((current) => setTargetNote(current, player.id, e.target.value))}
+              placeholder="es. solo se libero il ruolo"
+            />
+          </label>
+          <span className="target-status free">Libero</span>
+          <button
+            className="target-remove"
+            onClick={() => setTargets((current) => removeTarget(current, player.id))}
+            aria-label={`Rimuovi ${player.nome} dagli obiettivi`}
+          >
+            Rimuovi
+          </button>
+        </>
+      ) : status === "achieved" ? (
+        <span className="target-status achieved">
+          Preso da te{taken?.price != null ? ` · ${taken.price} cr.` : ""}
+        </span>
+      ) : (
+        <span className="target-status lost">
+          Perso: preso da {takenByName || "un'altra squadra"}
+          {taken?.price != null ? ` · ${taken.price} cr.` : ""}
+        </span>
+      )}
+    </article>
   );
 }
 
@@ -1394,15 +1460,7 @@ function Auction({ data, openPlayer, rules, profileId, apiBase, playerStatus, on
     profileId ?? data.profileId ?? data.profile_id ?? "default",
   );
   const rulesSignature = JSON.stringify(activeRules);
-  const configuredUserIndex = Number(activeRules.userTeam);
-  const defaultUserTeamIndex = Math.max(
-    0,
-    Number.isInteger(configuredUserIndex) &&
-      configuredUserIndex >= 0 &&
-      configuredUserIndex < activeRules.participants
-      ? configuredUserIndex
-      : (activeRules.teamNames?.indexOf(activeRules.userTeam) ?? -1),
-  );
+  const defaultUserTeamIndex = resolveUserTeamIndex(activeRules);
   const initializeSession = () => {
     const { envelope, restored } = loadActiveEnvelope(activeProfileId);
     if (envelope) {
@@ -1434,6 +1492,7 @@ function Auction({ data, openPlayer, rules, profileId, apiBase, playerStatus, on
   const [envelopeMeta, setEnvelopeMeta] = useState(initial.meta);
   const [restoredAt, setRestoredAt] = useState(initial.restoredAt);
   const [userTeamIndex, setUserTeamIndex] = useState(defaultUserTeamIndex);
+  const [targets, setTargets] = useTargets(activeProfileId, data.players);
   const [query, setQuery] = useState(initialCandidate?.nome || "");
   const [player, setPlayer] = useState(initialCandidate);
   const [owner, setOwner] = useState(initialCandidate ? initial.pendingNomination.owner : userTeamIndex);
@@ -1920,18 +1979,20 @@ function Auction({ data, openPlayer, rules, profileId, apiBase, playerStatus, on
                   : "Nessun giocatore disponibile"}
               </span>
               {choices.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => selectPlayer(p)}
-                  aria-label={`Seleziona ${p.nome}, ${p.ruolo}, ${p.squadra}`}
-                >
-                  <i className={"role " + p.ruolo}>{p.ruolo}</i>
-                  <b>{p.nome}</b>
-                  <PlayerStatusBadge players={playerStatus?.players} name={p.nome} />
-                  <small>
-                    <TeamBadge team={p.squadra} size={14} /> {p.squadra} · {p.fvm_scaled}
-                  </small>
-                </button>
+                <div key={p.id} className="auction-result-row">
+                  <button
+                    onClick={() => selectPlayer(p)}
+                    aria-label={`Seleziona ${p.nome}, ${p.ruolo}, ${p.squadra}`}
+                  >
+                    <i className={"role " + p.ruolo}>{p.ruolo}</i>
+                    <b>{p.nome}</b>
+                    <PlayerStatusBadge players={playerStatus?.players} name={p.nome} />
+                    <small>
+                      <TeamBadge team={p.squadra} size={14} /> {p.squadra} · {p.fvm_scaled}
+                    </small>
+                  </button>
+                  <TargetStar player={p} targets={targets} setTargets={setTargets} />
+                </div>
               ))}
             </div>
           )}
@@ -1967,6 +2028,23 @@ function Auction({ data, openPlayer, rules, profileId, apiBase, playerStatus, on
         defaultFromMatchday={data.calendario_lega?.matchdays?.[0]?.serie_a_matchday ?? 1}
         openPlayer={openPlayer}
         playerStatus={playerStatus?.players}
+        targets={targets}
+        setTargets={setTargets}
+      />
+      <NominationSuggestions
+        availablePlayers={data.players.filter((p) => !state.assigned[playerIdKey(p.id)])}
+        watchlist={targets}
+        myTeam={{ slotsByRole: slotsLeft(state.teams[userTeamIndex], activeRules) }}
+        opponentTeams={state.teams
+          .map((team, index) => ({ team, index }))
+          .filter(({ index }) => index !== userTeamIndex)
+          .map(({ team }) => ({
+            name: team.name,
+            budgetResidual: team.credits,
+            slotsByRole: slotsLeft(team, activeRules),
+          }))}
+        budgetPlan={overviewAdvice?.rolePlan}
+        apiBase={apiBase}
       />
       {player && (
         <section className="auction-advice">

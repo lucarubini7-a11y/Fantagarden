@@ -24,13 +24,7 @@ def _text_field(value: Any) -> Any:
     return value if value not in (None, "") else "n/d"
 
 
-def build_advisor_prompt(context: dict[str, Any]) -> str:
-    """Builds a concise Italian prompt.
-
-    Only aggregated opponent data (budget, open slots) goes in - never an
-    opponent's individual roster - so the model never sees more than a human
-    watching the same auction screen would.
-    """
+def _build_evaluate_candidate_prompt(context: dict[str, Any]) -> str:
     player = context.get("player") or {}
     my_team = context.get("my_team") or {}
     other_teams = context.get("other_teams") or []
@@ -78,6 +72,74 @@ def build_advisor_prompt(context: dict[str, Any]) -> str:
         "Non ripetere i numeri gia' mostrati a schermo."
     )
     return "\n".join(lines)
+
+
+def _build_suggest_nomination_prompt(context: dict[str, Any]) -> str:
+    """Chooses one of the (already locally-ranked) nomination candidates.
+
+    top_suggestions comes from web/src/nomination-advisor.js: this prompt
+    does not re-derive the ranking, it only asks Claude to pick and argue
+    for one of the five, adding reasoning a plain score can't (timing, the
+    risk a specific opponent grabs it first, the knock-on effect on your
+    own remaining budget) rather than restating the numbers already shown.
+    """
+    my_team = context.get("my_team") or {}
+    other_teams = context.get("other_teams") or []
+    suggestions = context.get("top_suggestions") or []
+
+    lines = [
+        "Sei un consulente esperto di aste del Fantacalcio. Il sistema ha gia' "
+        "selezionato in locale 5 giocatori papabili da chiamare adesso: il tuo "
+        "compito e' sceglierne UNO solo e argomentare la scelta, non ricalcolare i punteggi.",
+        "",
+        f"La mia squadra: budget residuo {_text_field(my_team.get('budget_residuo'))} crediti, "
+        f"slot rimasti per ruolo {_text_field(my_team.get('slot_rimasti_per_ruolo'))}.",
+    ]
+
+    if other_teams:
+        lines.append("Altre squadre (solo aggregati, mai la loro rosa):")
+        for team in other_teams:
+            lines.append(
+                f"- {_text_field(team.get('nome_squadra'))}: "
+                f"{_text_field(team.get('budget_residuo'))} crediti, "
+                f"slot rimasti {_text_field(team.get('slot_rimasti_per_ruolo'))}"
+            )
+
+    lines.append("")
+    lines.append("Candidati da chiamare adesso, gia' selezionati dal sistema:")
+    for suggestion in suggestions[:5]:
+        player = suggestion.get("player") or {}
+        reasons = suggestion.get("reasons") or []
+        lines.append(
+            f"- {_text_field(player.get('nome'))} ({_text_field(player.get('ruolo'))}, "
+            f"{_text_field(player.get('squadra'))}): {'; '.join(reasons) or 'n/d'}"
+        )
+
+    lines.append("")
+    lines.append(
+        "Rispondi in italiano, tono colloquiale da consulente d'asta, in 2-4 frasi: "
+        "scegli UN solo nome tra questi e spiega perche' proprio quello, aggiungendo "
+        "un ragionamento che i punteggi da soli non danno (es. tempismo, rischio che "
+        "una squadra avversaria in particolare lo chiami per prima, effetto sul tuo "
+        "budget residuo per gli slot che ti restano). Non ripetere i punteggi numerici "
+        "ne' le motivazioni gia' elencate sopra parola per parola."
+    )
+    return "\n".join(lines)
+
+
+def build_advisor_prompt(context: dict[str, Any]) -> str:
+    """Builds a concise Italian prompt.
+
+    Only aggregated opponent data (budget, open slots) goes in - never an
+    opponent's individual roster - so the model never sees more than a human
+    watching the same auction screen would. `context["mode"]` picks which
+    of the two advisor flavors to build for; it defaults to
+    "evaluate_candidate" so existing callers are unaffected.
+    """
+    mode = context.get("mode") or "evaluate_candidate"
+    if mode == "suggest_nomination":
+        return _build_suggest_nomination_prompt(context)
+    return _build_evaluate_candidate_prompt(context)
 
 
 def call_advisor(

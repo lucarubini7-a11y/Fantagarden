@@ -3,6 +3,7 @@ import { playerIdKey } from "./auction-state.js";
 import { scoreByUpcomingFixtures } from "./fixture-advisor.js";
 import { playerStatusBadge } from "./player-status-client.js";
 import { TeamBadge } from "./team-badge.jsx";
+import { TargetStar } from "./target-star.jsx";
 
 const ROLE_LABELS = { P: "Portieri", D: "Difensori", C: "Centrocampisti", A: "Attaccanti" };
 const LABEL_CLASS = { facile: "good", medio: "caution", duro: "bad" };
@@ -29,6 +30,8 @@ export function FixtureAdvisor({
   serieAMatchdays = 38,
   openPlayer,
   playerStatus,
+  targets,
+  setTargets,
 }) {
   const [role, setRole] = useState(() => activeRole || "P");
   const [fromMatchday, setFromMatchday] = useState(defaultFromMatchday);
@@ -90,44 +93,48 @@ export function FixtureAdvisor({
             const nextOpponents = nextOpponentsFor(teams, player, fromMatchday);
             const badge = playerStatusBadge(playerStatus, player.nome);
             return (
-              <button
-                key={player.id}
-                className="fixture-advisor-row"
-                onClick={() => openPlayer?.(player)}
-              >
-                <span>
-                  <b>{player.nome}</b>
-                  {badge && (
-                    <i
-                      className={`player-status-badge ${badge.className}`}
-                      role="img"
-                      aria-label={badge.ariaLabel}
-                      title={badge.title}
-                    />
-                  )}
-                  <small className="fixture-advisor-meta">
-                    <span className="fixture-advisor-team">
-                      <TeamBadge team={player.squadra} size={14} /> {player.squadra}
-                    </span>
-                    {nextOpponents && (
-                      <span className="fixture-advisor-opponents">
-                        {nextOpponents.map((fixture, index) => (
-                          <span className="fixture-advisor-opponent" key={index}>
-                            {fixture.venue === "CASA" ? "vs" : "@"}
-                            <TeamBadge team={fixture.opponent} size={12} /> {fixture.opponent}
-                          </span>
-                        ))}
-                      </span>
+              <div key={player.id} className="fixture-advisor-row-wrap">
+                <button
+                  className="fixture-advisor-row"
+                  onClick={() => openPlayer?.(player)}
+                >
+                  <span>
+                    <b>{player.nome}</b>
+                    {badge && (
+                      <i
+                        className={`player-status-badge ${badge.className}`}
+                        role="img"
+                        aria-label={badge.ariaLabel}
+                        title={badge.title}
+                      />
                     )}
-                  </small>
-                </span>
-                <em>{player.fvm_scaled}</em>
-                {player.fixtureLabel && (
-                  <i className={`fixture-tag ${LABEL_CLASS[player.fixtureLabel]}`}>
-                    {player.fixtureLabel}
-                  </i>
+                    <small className="fixture-advisor-meta">
+                      <span className="fixture-advisor-team">
+                        <TeamBadge team={player.squadra} size={14} /> {player.squadra}
+                      </span>
+                      {nextOpponents && (
+                        <span className="fixture-advisor-opponents">
+                          {nextOpponents.map((fixture, index) => (
+                            <span className="fixture-advisor-opponent" key={index}>
+                              {fixture.venue === "CASA" ? "vs" : "@"}
+                              <TeamBadge team={fixture.opponent} size={12} /> {fixture.opponent}
+                            </span>
+                          ))}
+                        </span>
+                      )}
+                    </small>
+                  </span>
+                  <em>{player.fvm_scaled}</em>
+                  {player.fixtureLabel && (
+                    <i className={`fixture-tag ${LABEL_CLASS[player.fixtureLabel]}`}>
+                      {player.fixtureLabel}
+                    </i>
+                  )}
+                </button>
+                {targets && setTargets && (
+                  <TargetStar player={player} targets={targets} setTargets={setTargets} />
                 )}
-              </button>
+              </div>
             );
           })}
         </div>

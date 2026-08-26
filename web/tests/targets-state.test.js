@@ -9,6 +9,8 @@ import {
   serializeTargets,
   setTargetMaxBid,
   setTargetNote,
+  setTargetPriority,
+  targetStatus,
   targetsStorageKey,
 } from "../src/targets-state.js";
 
@@ -17,14 +19,31 @@ const players = [{ id: 1, ruolo: "P" }, { id: 2, ruolo: "A" }];
 test("adds, notes, prices, and removes a target", () => {
   let targets = addTarget(emptyTargets(), 1);
   assert.equal(isTargeted(targets, 1), true);
-  assert.deepEqual(targets["1"], { note: "", maxBid: null });
+  assert.deepEqual(targets["1"], { note: "", maxBid: null, priority: "media" });
 
   targets = setTargetNote(targets, 1, "solo se libero un posto");
   targets = setTargetMaxBid(targets, 1, "45");
-  assert.deepEqual(targets["1"], { note: "solo se libero un posto", maxBid: 45 });
+  assert.deepEqual(targets["1"], { note: "solo se libero un posto", maxBid: 45, priority: "media" });
 
   targets = removeTarget(targets, 1);
   assert.equal(isTargeted(targets, 1), false);
+});
+
+test("sets and validates priority", () => {
+  let targets = addTarget(emptyTargets(), 1);
+  targets = setTargetPriority(targets, 1, "alta");
+  assert.equal(targets["1"].priority, "alta");
+
+  targets = setTargetPriority(targets, 1, "non-existent");
+  assert.equal(targets["1"].priority, "media");
+
+  assert.equal(setTargetPriority(emptyTargets(), 1, "alta")["1"], undefined);
+});
+
+test("targetStatus derives active/achieved/lost from the assignment", () => {
+  assert.equal(targetStatus(null, 0), "active");
+  assert.equal(targetStatus({ owner: 0, price: 20 }, 0), "achieved");
+  assert.equal(targetStatus({ owner: 2, price: 20 }, 0), "lost");
 });
 
 test("adding an already-targeted player is a no-op", () => {
@@ -42,13 +61,17 @@ test("rejects a non-positive or non-integer max bid", () => {
   assert.equal(targets["1"].maxBid, 20);
 });
 
-test("rehydrates only entries for players still in the dataset", () => {
+test("rehydrates only entries for players still in the dataset, defaulting priority", () => {
   const saved = serializeTargets({
-    1: { note: "top target", maxBid: 30 },
+    1: { note: "top target", maxBid: 30, priority: "alta" },
+    2: { note: "no priority yet", maxBid: 10 },
     99: { note: "stale", maxBid: 10 },
   });
   const targets = rehydrateTargets(saved, players);
-  assert.deepEqual(targets, { 1: { note: "top target", maxBid: 30 } });
+  assert.deepEqual(targets, {
+    1: { note: "top target", maxBid: 30, priority: "alta" },
+    2: { note: "no priority yet", maxBid: 10, priority: "media" },
+  });
 });
 
 test("rejects corrupt or unversioned storage", () => {

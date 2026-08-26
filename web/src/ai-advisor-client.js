@@ -43,6 +43,32 @@ export function buildAdvisorContext({ player, maxBid, currentBid, myTeam, otherT
   };
 }
 
+/**
+ * Builds the /api/advisor-live request body for the "pick one of these 5
+ * nomination suggestions" mode. Opponents are reduced to the same
+ * budget+slots aggregate as evaluate_candidate - never their roster - by
+ * construction, since only those fields are ever read off `opponentTeams`.
+ */
+export function contextFromNominationSuggestions({ suggestions, myTeam, opponentTeams }) {
+  return {
+    mode: "suggest_nomination",
+    my_team: {
+      budget_residuo: myTeam?.budgetResidual ?? null,
+      slot_rimasti_per_ruolo: myTeam?.slotsByRole ?? {},
+    },
+    other_teams: (opponentTeams || []).map((team) => ({
+      nome_squadra: team.name,
+      budget_residuo: team.budgetResidual,
+      slot_rimasti_per_ruolo: team.slotsByRole,
+    })),
+    top_suggestions: (suggestions || []).map((entry) => ({
+      player: { nome: entry.player.nome, ruolo: entry.player.ruolo, squadra: entry.player.squadra },
+      score: entry.score,
+      reasons: entry.reasons,
+    })),
+  };
+}
+
 /** Assembles the advisor context directly from the live Auction component's state. */
 export function contextFromAuctionState({ player, state, owner, price, advice, players, rules }) {
   const teamsWithSlots = state.teams.map((team) => ({ ...team, slotsLeft: slotsLeft(team, rules) }));

@@ -231,6 +231,7 @@ function validate(profile) {
   });
   const teams = profile.participants.team_names.map((team) => team.trim());
   if (teams.length < 2) errors.push("Aggiungi almeno due squadre.");
+  if (teams.length > 10) errors.push("Il numero massimo di squadre è 10.");
   if (teams.some((team) => !team))
     errors.push("I nomi delle squadre non possono essere vuoti.");
   if (new Set(teams).size !== teams.length)
@@ -770,21 +771,27 @@ export function LeagueSettings({
         </div>
         <div className="ls-subheading">
           <h3>Squadre</h3>
-          <button
-            type="button"
-            className="ls-text-button"
-            onClick={() =>
-              update(
-                ["participants", "team_names"],
-                [
-                  ...profile.participants.team_names,
-                  `Squadra ${profile.participants.team_names.length + 1}`,
-                ],
-              )
-            }
-          >
-            Aggiungi squadra
-          </button>
+          <span className="ls-inline-actions">
+            {profile.participants.team_names.length >= 10 && (
+              <span>Massimo 10 squadre raggiunto</span>
+            )}
+            <button
+              type="button"
+              className="ls-text-button"
+              disabled={profile.participants.team_names.length >= 10}
+              onClick={() =>
+                update(
+                  ["participants", "team_names"],
+                  [
+                    ...profile.participants.team_names,
+                    `Squadra ${profile.participants.team_names.length + 1}`,
+                  ],
+                )
+              }
+            >
+              Aggiungi squadra
+            </button>
+          </span>
         </div>
         <div className="ls-team-list">
           {profile.participants.team_names.map((team, index) => (

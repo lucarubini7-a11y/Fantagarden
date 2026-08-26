@@ -54,6 +54,14 @@ def test_validation_rejects_invalid_profile_rules():
         LeagueProfile.from_dict(value)
 
 
+def test_validation_rejects_more_than_ten_teams():
+    value = json.loads(PROFILE_PATH.read_text())
+    value["participants"]["team_names"] = [f"Squadra extra {i}" for i in range(11)]
+    value["participants"]["user_team"] = value["participants"]["team_names"][0]
+    with pytest.raises(ValueError, match="at most ten"):
+        LeagueProfile.from_dict(value)
+
+
 def test_auction_nomination_policies_and_legacy_round_robin_are_supported():
     value = json.loads(PROFILE_PATH.read_text())
     assert NOMINATION_POLICIES == ("call", "call_by_role", "random", "random_by_role", "alphabetical", "alphabetical_by_role")

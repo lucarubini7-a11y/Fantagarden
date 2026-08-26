@@ -69,6 +69,7 @@ class ParticipantConfig:
 
     def __post_init__(self) -> None:
         _require(len(self.team_names) >= 2, "at least two team names are required")
+        _require(len(self.team_names) <= 10, "at most ten team names are allowed")
         _require(all(name.strip() for name in self.team_names), "team names cannot be blank")
         _require(len(set(self.team_names)) == len(self.team_names), "team names must be unique")
         _require(self.user_team in self.team_names, "user_team must be a team name")

@@ -260,6 +260,11 @@
   color: var(--muted);
   font-size: 14px;
 }
+.ls-inline-actions {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
 .ls-text-button,
 .ls-remove {
   border: 0;

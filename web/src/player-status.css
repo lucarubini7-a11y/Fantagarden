@@ -1,0 +1,7 @@
+.player-status-badge{display:inline-flex;align-items:center;gap:2px;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:800;margin-left:6px;vertical-align:middle;font-style:normal}
+.player-status-inf{background:#4a2323;color:#ffbdbd}
+.player-status-diff{background:#5a4821;color:#ffdf8f}
+.player-status-dubbio{background:#4a3620;color:#ffcf9e}
+.player-status-freshness{display:flex;align-items:center;gap:8px;margin:6px 0 0;color:#8a978a;font-size:11px}
+.player-status-freshness button{border:1px solid #56665a;background:#1c2820;color:#dfe6df;border-radius:5px;padding:3px 8px;font-size:11px}
+.player-status-freshness button:hover{background:#2a3a2f}

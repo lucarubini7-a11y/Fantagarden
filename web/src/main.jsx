@@ -4,6 +4,7 @@ import "./index.css";
 import RandomAuctionView from "./random-auction.jsx";
 import { AiAdvisorPanel } from "./ai-advisor.jsx";
 import { FixtureAdvisor } from "./fixture-advisor.jsx";
+import { fetchPlayerStatus, formatPlayerStatusUpdatedAt, playerStatusBadge } from "./player-status-client.js";
 import { LeagueSettings } from "./league-settings.jsx";
 import { normalizeRules } from "./league-rules.js";
 import { activeNominationRole } from "./auction-nomination.js";
@@ -76,6 +77,7 @@ function App() {
   const [generationStatus, setGenerationStatus] = useState("");
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulationStatus, setSimulationStatus] = useState("");
+  const [playerStatus, setPlayerStatus] = useState({ fetchedAt: null, players: {} });
   const apiBase =
     import.meta.env.VITE_LOCAL_API_BASE || "http://127.0.0.1:8000";
   const [view, setView] = useState("overview");
@@ -105,6 +107,13 @@ function App() {
       .then(setSeason)
       .catch(() => setSeason(null));
   }, [apiBase, profile]);
+  const refreshPlayerStatus = (forceRefresh = false) => {
+    fetchPlayerStatus(apiBase, { forceRefresh }).then(setPlayerStatus);
+  };
+  useEffect(() => {
+    if (!data) return;
+    refreshPlayerStatus(false);
+  }, [data, apiBase]);
   useEffect(() => {
     const initialRoute = { view: "overview", player: null, team: null };
     window.history.replaceState(
@@ -352,6 +361,8 @@ function App() {
           rules={activeRules}
           profileId={activeProfileId}
           apiBase={apiBase}
+          playerStatus={playerStatus}
+          onRefreshPlayerStatus={refreshPlayerStatus}
         />
       )}
       {view === "settings" && (
@@ -1329,6 +1340,16 @@ function AuctionOverview({ overview }) {
   );
 }
 
+function PlayerStatusBadge({ players, name }) {
+  const badge = playerStatusBadge(players, name);
+  if (!badge) return null;
+  return (
+    <i className={`player-status-badge ${badge.className}`} title={badge.title}>
+      {badge.emoji} {badge.label}
+    </i>
+  );
+}
+
 function SaveIndicator({ status }) {
   const label =
     status.status === "pending"
@@ -1353,7 +1374,7 @@ const restoreCandidate = (pending, players, assigned) => {
   return candidate && !assigned[playerIdKey(candidate.id)] ? candidate : null;
 };
 
-function Auction({ data, openPlayer, rules, profileId, apiBase }) {
+function Auction({ data, openPlayer, rules, profileId, apiBase, playerStatus, onRefreshPlayerStatus }) {
   const activeRules = normalizeRules(
     rules ?? data.league_rules ?? { startingCredits: 750 },
   );
@@ -1763,6 +1784,13 @@ function Auction({ data, openPlayer, rules, profileId, apiBase }) {
           conferma il prezzo.
         </p>
         <SaveIndicator status={saveStatus} />
+        <p className="player-status-freshness">
+          Stato giocatori aggiornato:{" "}
+          {formatPlayerStatusUpdatedAt(playerStatus?.fetchedAt) || "non disponibile"}
+          <button type="button" onClick={() => onRefreshPlayerStatus?.(true)}>
+            Aggiorna ora
+          </button>
+        </p>
       </div>
       {restoredAt && (
         <p className="session-banner" role="status">
@@ -1886,6 +1914,7 @@ function Auction({ data, openPlayer, rules, profileId, apiBase }) {
                 >
                   <i className={"role " + p.ruolo}>{p.ruolo}</i>
                   <b>{p.nome}</b>
+                  <PlayerStatusBadge players={playerStatus?.players} name={p.nome} />
                   <small>
                     {p.squadra} · {p.fvm_scaled}
                   </small>
@@ -1924,12 +1953,15 @@ function Auction({ data, openPlayer, rules, profileId, apiBase }) {
         activeRole={activeRole}
         defaultFromMatchday={data.calendario_lega?.matchdays?.[0]?.serie_a_matchday ?? 1}
         openPlayer={openPlayer}
+        playerStatus={playerStatus?.players}
       />
       {player && (
         <section className="auction-advice">
           <div>
             <span className={"role " + player.ruolo}>{player.ruolo}</span>
-            <h2>{player.nome}</h2>
+            <h2>
+              {player.nome} <PlayerStatusBadge players={playerStatus?.players} name={player.nome} />
+            </h2>
             <p>
               {player.squadra} · {formatTier(player.guida_asta_fascia)}
             </p>
@@ -2046,6 +2078,7 @@ function Auction({ data, openPlayer, rules, profileId, apiBase }) {
                   <button key={p.id} onClick={() => openPlayer(p)}>
                     <i className={"role " + p.ruolo}>{p.ruolo}</i>
                     {p.nome}
+                    <PlayerStatusBadge players={playerStatus?.players} name={p.nome} />
                     <em>{state.assigned[playerIdKey(p.id)]?.price}</em>
                   </button>
                 ))

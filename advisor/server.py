@@ -14,7 +14,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 
 from .generate import (
     PipelineGenerator,
@@ -51,6 +51,7 @@ VITE_ORIGIN = re.compile(r"https?://(?:localhost|127\.0\.0\.1)(?::\d+)?\Z")
 ProfileLoader = Callable[[dict[str, Any]], Any]
 SimulationRunner = Callable[[Any, Path, int, int], dict[str, Any]]
 AdvisorRunner = Callable[[dict[str, Any]], dict[str, Any]]
+PlayerStatusFetcher = Callable[..., dict[str, Any]]
 
 
 class LocalApiServer(ThreadingHTTPServer):
@@ -67,6 +68,7 @@ class LocalApiServer(ThreadingHTTPServer):
         generator: PipelineGenerator | None = None,
         simulator: SimulationRunner | None = None,
         advisor: AdvisorRunner | None = None,
+        player_status_fetcher: PlayerStatusFetcher | None = None,
         profile_loader: ProfileLoader = load_profile,
     ) -> None:
         self.profiles_dir = Path(profiles_dir)
@@ -76,6 +78,7 @@ class LocalApiServer(ThreadingHTTPServer):
         self.generator = generator
         self.simulator = simulator or _simulate_current_dataset
         self.advisor = advisor or _call_ai_advisor
+        self.player_status_fetcher = player_status_fetcher or _fetch_player_status_default
         self.profile_loader = profile_loader
         super().__init__(address, LocalApiHandler)
 
@@ -94,6 +97,8 @@ class LocalApiHandler(BaseHTTPRequestHandler):
             self._default_profile()
         elif path.startswith("/api/profiles/"):
             self._get_profile(path.removeprefix("/api/profiles/"))
+        elif path == "/api/player-status":
+            self._player_status()
         elif path == "/api/datasets/manifest":
             self._dataset_manifest()
         elif path.startswith("/api/datasets/"):
@@ -180,6 +185,11 @@ class LocalApiHandler(BaseHTTPRequestHandler):
         if request is None:
             return
         self._send_json(HTTPStatus.OK, self.server.advisor(request))
+
+    def _player_status(self) -> None:
+        query = parse_qs(urlparse(self.path).query)
+        force_refresh = query.get("refresh", ["0"])[0].lower() in ("1", "true")
+        self._send_json(HTTPStatus.OK, self.server.player_status_fetcher(force_refresh=force_refresh))
 
     def _default_profile(self) -> None:
         try:
@@ -432,10 +442,11 @@ def create_server(
     generator: PipelineGenerator | None = None,
     simulator: SimulationRunner | None = None,
     advisor: AdvisorRunner | None = None,
+    player_status_fetcher: PlayerStatusFetcher | None = None,
     profile_loader: ProfileLoader = load_profile,
 ) -> LocalApiServer:
     """Create a local API server; inject a pipeline generator for tests or embedding."""
-    return LocalApiServer(address, profiles_dir=profiles_dir, datasets_dir=datasets_dir, uploads_dir=uploads_dir, default_profile_path=default_profile_path, generator=generator, simulator=simulator, advisor=advisor, profile_loader=profile_loader)
+    return LocalApiServer(address, profiles_dir=profiles_dir, datasets_dir=datasets_dir, uploads_dir=uploads_dir, default_profile_path=default_profile_path, generator=generator, simulator=simulator, advisor=advisor, player_status_fetcher=player_status_fetcher, profile_loader=profile_loader)
 
 
 def _simulate_current_dataset(profile: Any, output_dir: Path, iterations: int, seed: int) -> dict[str, Any]:
@@ -449,6 +460,19 @@ def _call_ai_advisor(context: dict[str, Any]) -> dict[str, Any]:
     from .ai_advisor import call_advisor
 
     return call_advisor(context)
+
+
+def _fetch_player_status_default(*, force_refresh: bool = False) -> dict[str, Any]:
+    import csv
+
+    from .player_status import get_player_status
+
+    try:
+        with Path("data/raw/squadre.csv").open(encoding="utf-8") as handle:
+            team_names = [row["squadra"] for row in csv.DictReader(handle)]
+    except OSError:
+        team_names = []
+    return get_player_status(team_names, force_refresh=force_refresh)
 
 
 def main(argv: list[str] | None = None) -> None:

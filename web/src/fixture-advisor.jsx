@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { playerIdKey } from "./auction-state.js";
 import { scoreByUpcomingFixtures } from "./fixture-advisor.js";
+import { playerStatusBadge } from "./player-status-client.js";
 
 const ROLE_LABELS = { P: "Portieri", D: "Difensori", C: "Centrocampisti", A: "Attaccanti" };
 const LABEL_CLASS = { facile: "good", medio: "caution", duro: "bad" };
@@ -26,6 +27,7 @@ export function FixtureAdvisor({
   defaultFromMatchday = 1,
   serieAMatchdays = 38,
   openPlayer,
+  playerStatus,
 }) {
   const [role, setRole] = useState(() => activeRole || "P");
   const [fromMatchday, setFromMatchday] = useState(defaultFromMatchday);
@@ -85,6 +87,7 @@ export function FixtureAdvisor({
         <div className="fixture-advisor-list">
           {scored.map((player) => {
             const nextOpponents = nextOpponentsFor(teams, player, fromMatchday);
+            const badge = playerStatusBadge(playerStatus, player.nome);
             return (
               <button
                 key={player.id}
@@ -93,6 +96,11 @@ export function FixtureAdvisor({
               >
                 <span>
                   <b>{player.nome}</b>
+                  {badge && (
+                    <i className={`player-status-badge ${badge.className}`} title={badge.title}>
+                      {badge.emoji} {badge.label}
+                    </i>
+                  )}
                   <small>
                     {player.squadra}
                     {nextOpponents && (

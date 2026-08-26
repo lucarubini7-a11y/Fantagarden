@@ -12,6 +12,7 @@
 @import "./session.css" layer(components);
 @import "./ai-advisor.css" layer(components);
 @import "./fixture-advisor.css" layer(components);
+@import "./player-status.css" layer(components);
 
 @layer components {
   .auction-advice {

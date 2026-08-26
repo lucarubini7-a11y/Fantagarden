@@ -89,6 +89,41 @@ solo nell'ambiente del backend Python: il browser chiama sempre e soltanto
 Non committare mai la chiave; usa una variabile d'ambiente o un `.env` locale
 (già escluso da git, vedi `.env.example`).
 
+## Stato giocatori / infortuni (opzionale)
+
+Nella scheda **Asta live** compare un badge discreto accanto al nome di ogni
+giocatore infortunato (🔴 INF), diffidato (🟡 DIFF) o in dubbio (🟠 ?), nella
+ricerca, nelle rose delle squadre e nei consigli per reparto. Senza nulla di
+configurato non cambia nulla: nessun badge, nessun errore, il tool si
+comporta esattamente come prima.
+
+Per attivarlo, esporta **una sola** delle due chiavi prima di avviare il
+server (Highlightly viene provato per primo; se assente si passa
+automaticamente ad API-Football, ma solo dopo aver verificato che la
+stagione richiesta abbia davvero la copertura infortuni):
+
+```bash
+export HIGHLIGHTLY_API_KEY=...
+# oppure
+export API_FOOTBALL_API_KEY=...
+.venv/bin/python -m advisor.server --host 127.0.0.1 --port 8000
+```
+
+Lo stato viene richiesto una volta per squadra di Serie A (20 chiamate
+totali, mai per singolo giocatore) e tenuto in cache locale per 6 ore
+(`data/processed/player_status_cache.json`) per restare ampiamente sotto il
+limite di 100 richieste/giorno dei piani gratuiti. Il bottone "Aggiorna ora"
+nella scheda Asta forza un refresh immediato bypassando la cache.
+
+Nota: gli endpoint esatti dei due provider (percorsi, parametri, forma della
+risposta) sono scritti da documentazione pubblica ma non è stato possibile
+riverificarli dal vivo in questo ambiente di sviluppo (rete in uscita verso
+quei domini bloccata). Se al primo utilizzo con una chiave reale i dati non
+arrivano, controlla `advisor/player_status.py` (funzioni `_fetch_highlightly`
+e `_fetch_api_football`) contro la documentazione corrente del provider: il
+resto del sistema (cache, endpoint locale, badge, fallback) non dipende da
+quei dettagli ed è già testato.
+
 ## Verification
 
 ```bash

@@ -1,7 +1,6 @@
 import { StrictMode, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import RandomAuctionView from "./random-auction.jsx";
 import { AiAdvisorPanel } from "./ai-advisor.jsx";
 import { FixtureAdvisor } from "./fixture-advisor.jsx";
 import { fetchPlayerStatus, formatPlayerStatusUpdatedAt, playerStatusBadge } from "./player-status-client.js";
@@ -339,8 +338,6 @@ function App() {
             season={season}
             data={data}
             openPlayer={openPlayer}
-            rules={activeRules}
-            profileId={activeProfileId}
             onRerun={rerunSimulation}
             isSimulating={isSimulating}
             simulationStatus={simulationStatus}
@@ -385,36 +382,9 @@ function App() {
   );
 }
 
-function SeasonView({ season, data, openPlayer, rules, profileId, onRerun, isSimulating, simulationStatus }) {
-  const [mode, setMode] = useState("report");
+function SeasonView({ season, data, openPlayer, onRerun, isSimulating, simulationStatus }) {
   return (
-    <>
-      <div
-        className="simulation-mode"
-        role="group"
-        aria-label="Modalita simulazione"
-      >
-        <button
-          className={mode === "report" ? "active" : ""}
-          onClick={() => setMode("report")}
-          aria-pressed={mode === "report"}
-        >
-          Report rose
-        </button>
-        <button
-          className={mode === "auction" ? "active" : ""}
-          onClick={() => setMode("auction")}
-          aria-pressed={mode === "auction"}
-        >
-          Asta casuale
-        </button>
-      </div>
-      {mode === "auction" ? (
-        <RandomAuctionView data={data} rules={rules} profileId={profileId} />
-      ) : (
-        <SeasonReport season={season} data={data} openPlayer={openPlayer} onRerun={onRerun} isSimulating={isSimulating} simulationStatus={simulationStatus} />
-      )}
-    </>
+    <SeasonReport season={season} data={data} openPlayer={openPlayer} onRerun={onRerun} isSimulating={isSimulating} simulationStatus={simulationStatus} />
   );
 }
 

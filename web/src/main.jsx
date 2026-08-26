@@ -2,6 +2,7 @@ import { StrictMode, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import RandomAuctionView from "./random-auction.jsx";
+import { AiAdvisorPanel } from "./ai-advisor.jsx";
 import { LeagueSettings } from "./league-settings.jsx";
 import { normalizeRules } from "./league-rules.js";
 import { activeNominationRole } from "./auction-nomination.js";
@@ -349,6 +350,7 @@ function App() {
           openPlayer={openPlayer}
           rules={activeRules}
           profileId={activeProfileId}
+          apiBase={apiBase}
         />
       )}
       {view === "settings" && (
@@ -1350,7 +1352,7 @@ const restoreCandidate = (pending, players, assigned) => {
   return candidate && !assigned[playerIdKey(candidate.id)] ? candidate : null;
 };
 
-function Auction({ data, openPlayer, rules, profileId }) {
+function Auction({ data, openPlayer, rules, profileId, apiBase }) {
   const activeRules = normalizeRules(
     rules ?? data.league_rules ?? { startingCredits: 750 },
   );
@@ -1977,6 +1979,18 @@ function Auction({ data, openPlayer, rules, profileId }) {
         </section>
       )}
       {player && advice && <AuctionStrategy advice={advice} />}
+      {player && (
+        <AiAdvisorPanel
+          player={player}
+          state={state}
+          owner={owner}
+          price={price}
+          advice={advice}
+          data={data}
+          activeRules={activeRules}
+          apiBase={apiBase}
+        />
+      )}
       <div className="auction-teams">
         {state.teams.map((team, i) => {
           const left = slotsLeft(team, activeRules),

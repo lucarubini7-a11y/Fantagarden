@@ -66,6 +66,29 @@ after a matching private calendar has been supplied:
 .venv/bin/python -m advisor.simulate --profile config/default_profile.json --raw-dir data/raw --output-dir data/processed --iterations 1000 --seed 202627
 ```
 
+## AI Advisor (opzionale)
+
+Nella scheda **Asta live**, quando un giocatore è selezionato, è disponibile un
+bottone opzionale "🤖 Chiedi il consiglio AI" che chiede a Claude un secondo
+parere in linguaggio naturale. Non sostituisce il consiglio numerico calcolato
+localmente dal Web Worker (sempre disponibile, anche offline): è un livello
+aggiuntivo, richiesto esplicitamente un click alla volta, mai in automatico a
+ogni chiamata d'asta.
+
+Per attivarlo, esporta una chiave Anthropic prima di avviare il server:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+.venv/bin/python -m advisor.server --host 127.0.0.1 --port 8000
+```
+
+Senza la chiave configurata il bottone mostra semplicemente "Consiglio AI non
+configurato": nessun errore, nessun blocco del resto del tool. La chiave vive
+solo nell'ambiente del backend Python: il browser chiama sempre e soltanto
+`/api/advisor-live` sul server locale, mai l'API di Anthropic direttamente.
+Non committare mai la chiave; usa una variabile d'ambiente o un `.env` locale
+(già escluso da git, vedi `.env.example`).
+
 ## Verification
 
 ```bash

@@ -1,0 +1,10 @@
+.ai-advisor-panel{margin:10px 0 16px}
+.ai-advisor-panel>button{border:1px solid #8a6fd6;background:#241c3a;color:#e6dcff;border-radius:6px;padding:9px 14px;font-weight:700}
+.ai-advisor-panel>button:hover:not(:disabled){background:#332a4d}
+.ai-advisor-panel>button:disabled{opacity:.5;cursor:not-allowed}
+.ai-advisor-loading{color:#b9c2b9;font-size:13px;font-style:italic}
+.ai-advisor-result{display:flex;align-items:flex-start;gap:10px;border:1px solid #8a6fd6;border-radius:9px;background:#241c3a;color:#e6dcff;padding:14px 16px}
+.ai-advisor-icon{font-size:20px;line-height:1}
+.ai-advisor-result p{margin:0;flex:1;line-height:1.5;font-size:13px}
+.ai-advisor-retry{border:1px solid #8a6fd6;background:transparent;color:#c9b8ff;border-radius:5px;padding:5px 9px;font-size:12px;margin-left:8px}
+.ai-advisor-unavailable{display:flex;align-items:center;gap:8px;color:#8a978a;font-size:12px}

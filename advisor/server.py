@@ -50,6 +50,7 @@ FIXED_SOURCE_SUFFIXES = {
 VITE_ORIGIN = re.compile(r"https?://(?:localhost|127\.0\.0\.1)(?::\d+)?\Z")
 ProfileLoader = Callable[[dict[str, Any]], Any]
 SimulationRunner = Callable[[Any, Path, int, int], dict[str, Any]]
+AdvisorRunner = Callable[[dict[str, Any]], dict[str, Any]]
 
 
 class LocalApiServer(ThreadingHTTPServer):
@@ -65,6 +66,7 @@ class LocalApiServer(ThreadingHTTPServer):
         default_profile_path: Path | str = Path("config/default_profile.json"),
         generator: PipelineGenerator | None = None,
         simulator: SimulationRunner | None = None,
+        advisor: AdvisorRunner | None = None,
         profile_loader: ProfileLoader = load_profile,
     ) -> None:
         self.profiles_dir = Path(profiles_dir)
@@ -73,6 +75,7 @@ class LocalApiServer(ThreadingHTTPServer):
         self.default_profile_path = Path(default_profile_path)
         self.generator = generator
         self.simulator = simulator or _simulate_current_dataset
+        self.advisor = advisor or _call_ai_advisor
         self.profile_loader = profile_loader
         super().__init__(address, LocalApiHandler)
 
@@ -113,6 +116,9 @@ class LocalApiHandler(BaseHTTPRequestHandler):
             return
         if self._path() == "/api/simulate":
             self._simulate()
+            return
+        if self._path() == "/api/advisor-live":
+            self._advisor_live()
             return
         if self._path() != "/api/generate":
             self._error(HTTPStatus.NOT_FOUND, "not_found", "The requested endpoint does not exist.")
@@ -168,6 +174,12 @@ class LocalApiHandler(BaseHTTPRequestHandler):
             self._error(HTTPStatus.INTERNAL_SERVER_ERROR, "simulation_failed", "Simulation failed.")
             return
         self._send_json(HTTPStatus.OK, result)
+
+    def _advisor_live(self) -> None:
+        request = self._read_json_object()
+        if request is None:
+            return
+        self._send_json(HTTPStatus.OK, self.server.advisor(request))
 
     def _default_profile(self) -> None:
         try:
@@ -419,10 +431,11 @@ def create_server(
     default_profile_path: Path | str = Path("config/default_profile.json"),
     generator: PipelineGenerator | None = None,
     simulator: SimulationRunner | None = None,
+    advisor: AdvisorRunner | None = None,
     profile_loader: ProfileLoader = load_profile,
 ) -> LocalApiServer:
     """Create a local API server; inject a pipeline generator for tests or embedding."""
-    return LocalApiServer(address, profiles_dir=profiles_dir, datasets_dir=datasets_dir, uploads_dir=uploads_dir, default_profile_path=default_profile_path, generator=generator, simulator=simulator, profile_loader=profile_loader)
+    return LocalApiServer(address, profiles_dir=profiles_dir, datasets_dir=datasets_dir, uploads_dir=uploads_dir, default_profile_path=default_profile_path, generator=generator, simulator=simulator, advisor=advisor, profile_loader=profile_loader)
 
 
 def _simulate_current_dataset(profile: Any, output_dir: Path, iterations: int, seed: int) -> dict[str, Any]:
@@ -430,6 +443,12 @@ def _simulate_current_dataset(profile: Any, output_dir: Path, iterations: int, s
     from .config import LeagueConfig
 
     return run_simulation(output_dir, iterations=iterations, seed=seed, league=LeagueConfig.from_profile(profile))
+
+
+def _call_ai_advisor(context: dict[str, Any]) -> dict[str, Any]:
+    from .ai_advisor import call_advisor
+
+    return call_advisor(context)
 
 
 def main(argv: list[str] | None = None) -> None:

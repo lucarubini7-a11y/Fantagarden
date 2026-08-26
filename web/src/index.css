@@ -10,6 +10,7 @@
 @import "./league-settings.css" layer(components);
 @import "./targets.css" layer(components);
 @import "./session.css" layer(components);
+@import "./ai-advisor.css" layer(components);
 
 @layer components {
   .auction-advice {

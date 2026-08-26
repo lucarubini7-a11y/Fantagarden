@@ -9,6 +9,7 @@ import {
   supportedValues,
   tieBreakers,
 } from "./league-settings-policies.js";
+import { clearDraft, readDraft, writeDraft } from "./settings-draft.js";
 
 const roles = ["P", "D", "C", "A"];
 const roleBudgetLabels = {
@@ -380,7 +381,17 @@ export function LeagueSettings({
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [sourceStatuses, setSourceStatuses] = useState({});
+  const [draftPrompt, setDraftPrompt] = useState(() => readDraft(profile.profile_id));
   const errorRef = useRef(null);
+  const skipDraftWrite = useRef(true);
+  useEffect(() => {
+    if (skipDraftWrite.current) {
+      skipDraftWrite.current = false;
+      return undefined;
+    }
+    const timer = setTimeout(() => writeDraft(profile.profile_id, profile), 500);
+    return () => clearTimeout(timer);
+  }, [profile]);
   const endpoint = (path) => `${apiBase.replace(/\/$/, "")}${path}`;
   const sourceSignature = JSON.stringify(
     ["current_sources", "history_sources"].flatMap((group) =>
@@ -394,6 +405,7 @@ export function LeagueSettings({
     ),
   );
   useEffect(() => {
+    skipDraftWrite.current = true;
     setProfile(mergeProfile(initialProfile, leagueCalendar));
   }, [initialProfile, leagueCalendar]);
   useEffect(() => {
@@ -539,6 +551,8 @@ export function LeagueSettings({
       const callback = generate ? onGenerate : onSave;
       if (callback) {
         await callback(profile);
+        clearDraft(profile.profile_id);
+        setDraftPrompt(null);
         setStatus(
           generate
             ? "Dati rigenerati per questo profilo."
@@ -556,6 +570,8 @@ export function LeagueSettings({
       });
       if (!response.ok)
         throw new Error(`L'API locale ha restituito ${response.status}`);
+      clearDraft(profile.profile_id);
+      setDraftPrompt(null);
       setStatus(
         generate
           ? "Generazione richiesta correttamente."
@@ -661,6 +677,36 @@ export function LeagueSettings({
           generazione.
         </p>
       </header>
+      {draftPrompt && (
+        <div className="ls-draft-banner" role="status">
+          <span>
+            Trovata una bozza non salvata del{" "}
+            {new Date(draftPrompt.savedAt).toLocaleString("it-IT")}
+          </span>
+          <span className="ls-inline-actions">
+            <button
+              type="button"
+              className="ls-text-button"
+              onClick={() => {
+                setProfile(mergeProfile(draftPrompt.profile, leagueCalendar));
+                setDraftPrompt(null);
+              }}
+            >
+              Ripristina
+            </button>
+            <button
+              type="button"
+              className="ls-text-button"
+              onClick={() => {
+                clearDraft(profile.profile_id);
+                setDraftPrompt(null);
+              }}
+            >
+              Scarta
+            </button>
+          </span>
+        </div>
+      )}
       <p className="ls-status" role="status" aria-live="polite">
         {status}
       </p>

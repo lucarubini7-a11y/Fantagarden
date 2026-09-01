@@ -1,0 +1,24 @@
+.data-table-wrap{display:grid;gap:var(--space-sm);min-width:0}
+.data-table-filter{border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);border-radius:var(--radius-sm);padding:10px 12px;min-height:44px;font:inherit;width:100%;max-width:320px}
+.data-table-scroll{overflow-x:auto}
+.data-table{width:100%;min-width:480px;border-collapse:collapse}
+.data-table th{text-align:left;padding:10px 14px;font-size:var(--text-xs);color:var(--color-text-muted);border-bottom:var(--border-hairline)}
+.data-table-sort{display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;padding:0;font:inherit;color:inherit;min-height:32px}
+.data-table-sort-icon{font-size:9px;color:var(--color-pitch)}
+.data-table td{padding:12px 14px;border-bottom:var(--border-hairline);vertical-align:middle}
+.data-table tbody tr{transition:background var(--transition-fast)}
+.data-table tbody tr:hover{background:var(--color-active-nomination-bg-subtle)}
+.data-table tbody tr:last-child td{border-bottom:0}
+.data-table-empty{color:var(--color-text-muted);text-align:center;padding:var(--space-lg)}
+.data-table-num{font-family:var(--font-display);font-variant-numeric:tabular-nums}
+.data-table-name-btn{display:flex;align-items:center;gap:9px;border:0;background:transparent;padding:6px 0;text-align:left;font:inherit;color:inherit;min-height:32px}
+.data-table-team{display:flex;align-items:center;gap:5px;color:var(--color-text-muted);font-size:var(--text-xs);margin-top:2px}
+.data-table td select,.data-table td input{border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);border-radius:var(--radius-sm);padding:7px 8px;min-height:36px;font:inherit;width:100%;max-width:140px}
+.data-table td input[type="text"],.data-table td input:not([type]){max-width:200px}
+@media (max-width: 640px) {
+  .data-table thead { display: none; }
+  .data-table, .data-table tbody, .data-table tr, .data-table td { display: block; width: 100%; }
+  .data-table { min-width: 0; }
+  .data-table tr { border-bottom: var(--border-hairline); padding: var(--space-sm) 0; }
+  .data-table td { border-bottom: 0; padding: 4px 0; }
+}

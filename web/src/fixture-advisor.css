@@ -1,24 +1,11 @@
-.fixture-advisor{background:var(--color-surface-raised);border:var(--border-hairline);border-radius:var(--radius-md);padding:var(--space-md);margin-bottom:16px}
-.fixture-advisor-header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}
-.fixture-advisor-header h3{margin:0;font-size:var(--text-lg)}
-.fixture-advisor-controls{display:flex;gap:12px;flex-wrap:wrap}
+.fixture-advisor-controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:var(--space-md)}
 .fixture-advisor-controls label{display:flex;flex-direction:column;gap:4px;font-size:var(--text-xs);color:var(--color-text-muted)}
 .fixture-advisor-controls select,.fixture-advisor-controls input{border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);border-radius:var(--radius-sm);padding:6px 8px;width:90px;min-height:36px}
 .fixture-advisor-controls select{width:auto}
-.fixture-advisor-empty{color:var(--color-text-muted);font-size:var(--text-sm);margin:0}
-.fixture-advisor-list{display:grid;gap:6px}
-.fixture-advisor-row-wrap{display:flex;align-items:center;border-top:var(--border-hairline);transition:background var(--transition-fast)}
-.fixture-advisor-row-wrap:first-child{border-top:0}
-.fixture-advisor-row-wrap:hover{background:var(--color-pitch-tint)}
-.fixture-advisor-row{flex:1;display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;padding:9px 4px;min-height:44px}
-.fixture-advisor-row small{display:block;color:var(--color-text-muted);margin-top:2px;font-size:var(--text-xs)}
-small.fixture-advisor-meta{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px}
-.fixture-advisor-team{display:inline-flex;align-items:center;gap:5px}
-.fixture-advisor-opponents{display:inline-flex;flex-wrap:wrap;gap:8px}
-.fixture-advisor-opponent{display:inline-flex;align-items:center;gap:4px}
-.fixture-advisor-row em{font-style:normal;color:var(--color-pitch);font-size:var(--text-base);font-family:var(--font-display);font-variant-numeric:tabular-nums}
+.fixture-advisor-name{display:flex;flex-direction:column;gap:2px}
+.fixture-advisor-opponents{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.fixture-advisor-opponent{display:inline-flex;align-items:center;gap:4px;color:var(--color-text-muted);font-size:var(--text-xs)}
 .fixture-tag{border-radius:var(--radius-sm);padding:3px 8px;font-size:10px;font-weight:600;text-transform:uppercase}
 .fixture-tag.good{background:var(--color-pitch);color:var(--color-pitch-text)}
 .fixture-tag.caution{background:var(--color-yellow-card);color:var(--color-yellow-card-text)}
 .fixture-tag.bad{background:var(--color-red-card);color:var(--color-red-card-text)}
-@media(max-width:760px){.fixture-advisor-row{grid-template-columns:1fr auto}.fixture-tag{grid-column:2;justify-self:end}}

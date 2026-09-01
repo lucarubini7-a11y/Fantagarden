@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Skeleton } from "./skeleton.jsx";
 
 const UNAVAILABLE_MESSAGES = {
   missing_api_key: "Consiglio AI non configurato.",
@@ -58,9 +59,11 @@ export function AiResponseBox({ askLabel, ariaLabel, onAsk, resetKey }) {
         </button>
       )}
       {status === "loading" && (
-        <p className="ai-advisor-loading" role="status">
-          Sto pensando...
-        </p>
+        <div className="ai-advisor-loading" role="status">
+          <span className="sr-only">Sto pensando...</span>
+          <Skeleton width="90%" height={13} />
+          <Skeleton width="70%" height={13} style={{ marginTop: 6 }} />
+        </div>
       )}
       {status === "success" && (
         <div className="ai-advisor-result">

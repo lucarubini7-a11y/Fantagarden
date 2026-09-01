@@ -1,0 +1,16 @@
+.watchlist-panel-empty{margin:0;color:var(--color-text-muted);font-size:var(--text-sm)}
+.watchlist-panel{display:grid;gap:var(--space-md)}
+.watchlist-panel-summary{display:flex;gap:8px;margin:0}
+.watchlist-chip{border-radius:var(--radius-sm);padding:3px 8px;font-size:10px;font-weight:600}
+.watchlist-chip.achieved{background:var(--color-pitch);color:var(--color-pitch-text)}
+.watchlist-chip.lost{background:var(--color-red-card);color:var(--color-red-card-text)}
+.watchlist-priority-group{display:grid;gap:6px}
+.watchlist-priority-label{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;color:var(--color-text-muted)}
+.watchlist-priority-label.watchlist-priority-alta{color:var(--color-red-card)}
+.watchlist-priority-label.watchlist-priority-media{color:var(--color-yellow-card)}
+.watchlist-priority-group ul{display:grid;gap:2px;margin:0;padding:0;list-style:none}
+.watchlist-priority-group li{border-top:var(--border-hairline)}
+.watchlist-priority-group li:first-child{border-top:0}
+.watchlist-priority-group button{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;width:100%;border:0;background:transparent;padding:8px 4px;text-align:left;font:inherit;color:inherit;min-height:40px;transition:background var(--transition-fast)}
+.watchlist-priority-group button:hover{background:var(--color-active-nomination-bg-subtle)}
+.watchlist-priority-group button small{display:flex;align-items:center;gap:5px;color:var(--color-text-muted);margin-top:2px;font-size:var(--text-xs)}

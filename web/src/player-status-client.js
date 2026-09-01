@@ -1,5 +1,7 @@
+import { apiFetch } from "./api-client.js";
+
 /** Fetches /api/player-status. Never throws: any failure resolves to an empty result. */
-export async function fetchPlayerStatus(apiBase, { fetchImpl = globalThis.fetch, forceRefresh = false } = {}) {
+export async function fetchPlayerStatus(apiBase, { fetchImpl = apiFetch, forceRefresh = false } = {}) {
   try {
     const url = `${String(apiBase || "").replace(/\/$/, "")}/api/player-status${forceRefresh ? "?refresh=1" : ""}`;
     const response = await fetchImpl(url);

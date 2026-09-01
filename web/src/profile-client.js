@@ -1,4 +1,5 @@
 import { normalizeRules } from "./league-rules.js";
+import { apiFetch } from "./api-client.js";
 
 const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 const object = (value) => (isObject(value) ? value : {});
@@ -39,7 +40,7 @@ const profileId = (value) => {
   return value;
 };
 
-async function requestJson(url, { fetchImpl = globalThis.fetch, ...options } = {}) {
+async function requestJson(url, { fetchImpl = apiFetch, ...options } = {}) {
   if (typeof fetchImpl !== "function") fail("fetch_unavailable", "Fetch is unavailable.");
   let response;
   try {

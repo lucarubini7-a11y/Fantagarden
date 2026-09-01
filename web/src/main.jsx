@@ -53,6 +53,10 @@ import {
 } from "./profile-client.js";
 import { createRoleValuation, sourceFvm } from "./player-valuation.js";
 import { ROLE_LABELS } from "./role-labels.js";
+import { apiFetch } from "./api-client.js";
+import { AuthGate } from "./auth.jsx";
+
+export const API_BASE = import.meta.env.VITE_LOCAL_API_BASE || "http://127.0.0.1:8000";
 
 const formatTier = (tier) =>
   tier ? tier.replaceAll("_", " ") : "NON CLASSIFICATO";
@@ -79,8 +83,7 @@ function App() {
   const [simulationStatus, setSimulationStatus] = useState("");
   const [playerStatus, setPlayerStatus] = useState({ fetchedAt: null, players: {} });
   const [isPlayerStatusLoading, setIsPlayerStatusLoading] = useState(false);
-  const apiBase =
-    import.meta.env.VITE_LOCAL_API_BASE || "http://127.0.0.1:8000";
+  const apiBase = API_BASE;
   const [view, setView] = useState("overview");
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null);
@@ -89,7 +92,7 @@ function App() {
   ]);
   const [historyIndex, setHistoryIndex] = useState(0);
   useEffect(() => {
-    fetch(apiUrl("/api/default-profile", apiBase))
+    apiFetch(apiUrl("/api/default-profile", apiBase))
       .then((response) => (response.ok ? response.json() : null))
       .then(setProfile)
       .catch(() => setProfile(null));
@@ -103,7 +106,7 @@ function App() {
         setSelectedTeam((team) => team || nextData.teams[0]?.squadra || null);
       })
       .catch(() => setData(null));
-    fetch(apiUrl(`/api/datasets/${seasonSimulationPath(profile)}`, apiBase))
+    apiFetch(apiUrl(`/api/datasets/${seasonSimulationPath(profile)}`, apiBase))
       .then((response) => (response.ok ? response.json() : null))
       .then(setSeason)
       .catch(() => setSeason(null));
@@ -166,7 +169,7 @@ function App() {
     setProfileError("");
     if (!generate) return;
     try {
-      const response = await fetch(`${apiBase}/api/generate`, {
+      const response = await apiFetch(`${apiBase}/api/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ profile: nextProfile }),
@@ -211,7 +214,7 @@ function App() {
     setIsSimulating(true);
     setSimulationStatus("Simulazione in corso...");
     try {
-      const response = await fetch(`${apiBase}/api/simulate`, {
+      const response = await apiFetch(`${apiBase}/api/simulate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ profile, iterations: 1000, seed: 202627 }),
@@ -2122,6 +2125,8 @@ function Auction({ data, openPlayer, rules, profileId, apiBase, playerStatus, is
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <App />
+    <AuthGate apiBase={API_BASE}>
+      <App />
+    </AuthGate>
   </StrictMode>,
 );

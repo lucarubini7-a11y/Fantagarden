@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: fanta-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m advisor.server --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_SHARED_PASSWORD
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: HIGHLIGHTLY_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false

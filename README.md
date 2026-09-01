@@ -153,6 +153,59 @@ l'alias giusto alla tabella `ALIASES` in cima allo script e rilancialo. Le
 squadre ancora mancanti restano assenti da `team-badges.json` (nessun
 errore, nessun blocco: il frontend mostra il fallback a iniziali per loro).
 
+## Deploy pubblico
+
+Il tool resta pensato per un gruppo chiuso (es. la tua lega di 6 amici), non
+per il pubblico generico: l'unica protezione è una password condivisa, non un
+sistema di account. Passi per un deploy pubblico (backend su Render,
+frontend su Vercel):
+
+1. **Deploy del backend su Render** usando `render.yaml` nella root del
+   repo (Blueprint). Non è stato possibile riverificare dal vivo in questo
+   ambiente di sviluppo la sintassi più recente del Blueprint contro
+   render.com (rete in uscita verso quel dominio bloccata): prima del primo
+   deploy, controlla `render.yaml` contro la documentazione Render corrente
+   (es. se `env: python` è ancora il nome campo giusto). Al primo deploy
+   Render crea il servizio ma lascia vuote le variabili d'ambiente marcate
+   `sync: false`: vai nella dashboard Render
+   del servizio → Environment e imposta manualmente:
+   - `APP_SHARED_PASSWORD` — la password condivisa con gli amici (obbligatoria
+     per un deploy pubblico, vedi sotto).
+   - `ANTHROPIC_API_KEY` — per l'AI Advisor (opzionale, ma vedi la checklist
+     sul limite di spesa).
+   - `HIGHLIGHTLY_API_KEY` (o `API_FOOTBALL_API_KEY`) — per lo stato
+     infortuni/diffide (opzionale).
+   - `ALLOWED_ORIGINS` — l'URL Vercel del frontend, es.
+     `https://fanta-tuonome.vercel.app` (più `http://localhost:5173` se vuoi
+     continuare a sviluppare in locale contro lo stesso backend).
+2. **Deploy del frontend su Vercel** puntando alla cartella `web/`. Imposta
+   la variabile d'ambiente `VITE_LOCAL_API_BASE` sull'URL Render del backend
+   (vedi `web/.env.production.example`).
+3. **Attenzione**: senza `APP_SHARED_PASSWORD` impostata, il backend resta
+   raggiungibile da chiunque conosca l'URL, senza nessuna password (lo stesso
+   vale per `ALLOWED_ORIGINS` non impostata: il CORS resta permissivo). Va
+   bene così **solo** in locale o in un Codespace personale — non lasciarlo
+   così su un servizio con un URL pubblico.
+
+## Checklist prima di condividere il link
+
+Controlli manuali da fare tu, dopo il deploy, prima di mandare il link agli
+amici (non automatizzabili da codice):
+
+- Apri il link in una scheda in incognito e verifica che chieda la password.
+- Prova una password sbagliata e verifica che dia un errore chiaro.
+- Apri la console del browser (tab Network) e verifica che non ci siano
+  errori CORS mentre usi l'app.
+- Prova a chiamare un endpoint API direttamente dal browser senza aver
+  inserito la password (deve rispondere 401).
+- Imposta un limite di spesa mensile sulla chiave Anthropic da
+  [console.anthropic.com](https://console.anthropic.com), dato che ora l'app
+  è raggiungibile da più persone contemporaneamente.
+- Condividi password e link su canali/messaggi separati, non insieme.
+- Il piano gratuito Render "addormenta" il backend dopo 15 minuti di
+  inattività: apri il link qualche minuto prima di iniziare l'asta per farlo
+  svegliare in anticipo.
+
 ## Verification
 
 ```bash

@@ -10,6 +10,7 @@ import {
   tieBreakers,
 } from "./league-settings-policies.js";
 import { clearDraft, readDraft, writeDraft } from "./settings-draft.js";
+import { apiFetch } from "./api-client.js";
 
 const roles = ["P", "D", "C", "A"];
 const roleBudgetLabels = {
@@ -411,7 +412,7 @@ export function LeagueSettings({
   useEffect(() => {
     if (initialProfile || !profile.profile_id) return undefined;
     const controller = new AbortController();
-    fetch(endpoint(`/api/profiles/${encodeURIComponent(profile.profile_id)}`), {
+    apiFetch(endpoint(`/api/profiles/${encodeURIComponent(profile.profile_id)}`), {
       signal: controller.signal,
     })
       .then((response) =>
@@ -436,7 +437,7 @@ export function LeagueSettings({
       ),
     );
     setSourceStatuses(checking);
-    fetch(endpoint("/api/sources/status"), {
+    apiFetch(endpoint("/api/sources/status"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(profile),
@@ -563,7 +564,7 @@ export function LeagueSettings({
       const route = generate
         ? "/api/generate"
         : `/api/profiles/${encodeURIComponent(profile.profile_id)}`;
-      const response = await fetch(endpoint(route), {
+      const response = await apiFetch(endpoint(route), {
         method: generate ? "POST" : "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(generate ? { profile } : profile),
@@ -592,7 +593,7 @@ export function LeagueSettings({
     setSourceStatuses((current) => ({ ...current, [key]: "uploading" }));
     setStatus("");
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         endpoint(
           `/api/uploads/${encodeURIComponent(profile.profile_id)}/${group}/${encodeURIComponent(source.name)}`,
         ),

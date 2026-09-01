@@ -271,5 +271,53 @@ class LocalApiServerTests(unittest.TestCase):
         self.assertEqual(response.status, 400)
         self.assertEqual(payload["error"]["code"], "invalid_upload_type")
 
+
+class AllowedOriginsWhitelistTests(unittest.TestCase):
+    """With ALLOWED_ORIGINS set, only whitelisted origins get the CORS header."""
+
+    def setUp(self):
+        self.server = create_server(
+            ("127.0.0.1", 0),
+            allowed_origins=["https://fanta-example.vercel.app", "http://localhost:5173"],
+        )
+        self.thread = threading.Thread(target=self.server.serve_forever)
+        self.thread.start()
+
+    def tearDown(self):
+        self.server.shutdown()
+        self.thread.join()
+        self.server.server_close()
+
+    def request(self, method, path, body=None, headers=None):
+        connection = http.client.HTTPConnection(*self.server.server_address)
+        connection.request(method, path, body=body, headers=headers or {})
+        response = connection.getresponse()
+        payload = response.read()
+        connection.close()
+        return response, json.loads(payload) if payload else None
+
+    def test_whitelisted_origin_gets_the_cors_header(self):
+        response, _ = self.request(
+            "GET", "/api/profiles", headers={"Origin": "https://fanta-example.vercel.app"}
+        )
+        self.assertEqual(
+            response.getheader("Access-Control-Allow-Origin"),
+            "https://fanta-example.vercel.app",
+        )
+
+    def test_non_whitelisted_origin_gets_no_cors_header(self):
+        response, _ = self.request(
+            "GET", "/api/profiles", headers={"Origin": "https://evil.example.com"}
+        )
+        self.assertIsNone(response.getheader("Access-Control-Allow-Origin"))
+
+    def test_a_vite_dev_origin_not_on_the_explicit_list_is_also_rejected(self):
+        # Setting ALLOWED_ORIGINS turns off the permissive local-dev default.
+        response, _ = self.request(
+            "GET", "/api/profiles", headers={"Origin": "http://localhost:5999"}
+        )
+        self.assertIsNone(response.getheader("Access-Control-Allow-Origin"))
+
+
 if __name__ == "__main__":
     unittest.main()

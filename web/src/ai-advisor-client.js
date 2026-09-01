@@ -1,4 +1,5 @@
 import { playerIdKey, slotsLeft } from "./auction-state.js";
+import { apiFetch } from "./api-client.js";
 
 const ALTERNATIVES_LIMIT = 5;
 
@@ -91,7 +92,7 @@ export function contextFromAuctionState({ player, state, owner, price, advice, p
  * (HTTP error, server-reported unavailability, network error, timeout)
  * resolves to {status: "unavailable", reason, detail}.
  */
-export async function fetchAdvisorAdvice(apiBase, context, { fetchImpl = globalThis.fetch, timeoutMs = 10000 } = {}) {
+export async function fetchAdvisorAdvice(apiBase, context, { fetchImpl = apiFetch, timeoutMs = 10000 } = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {

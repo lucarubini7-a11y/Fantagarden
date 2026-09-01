@@ -6,8 +6,11 @@ the data pipeline and does not select a generator implementation itself.
 from __future__ import annotations
 
 import argparse
+import hmac
 import json
+import os
 import re
+import sys
 import tempfile
 from collections.abc import Callable
 from http import HTTPStatus
@@ -70,6 +73,8 @@ class LocalApiServer(ThreadingHTTPServer):
         advisor: AdvisorRunner | None = None,
         player_status_fetcher: PlayerStatusFetcher | None = None,
         profile_loader: ProfileLoader = load_profile,
+        shared_password: str | None = None,
+        allowed_origins: list[str] | None = None,
     ) -> None:
         self.profiles_dir = Path(profiles_dir)
         self.datasets_dir = Path(datasets_dir)
@@ -80,6 +85,8 @@ class LocalApiServer(ThreadingHTTPServer):
         self.advisor = advisor or _call_ai_advisor
         self.player_status_fetcher = player_status_fetcher or _fetch_player_status_default
         self.profile_loader = profile_loader
+        self.shared_password = shared_password or None
+        self.allowed_origins = allowed_origins
         super().__init__(address, LocalApiHandler)
 
 
@@ -90,6 +97,8 @@ class LocalApiHandler(BaseHTTPRequestHandler):
         self._send_json(HTTPStatus.NO_CONTENT, None)
 
     def do_GET(self) -> None:
+        if not self._require_auth():
+            return
         path = self._path()
         if path == "/api/profiles":
             self._profile_index()
@@ -107,6 +116,8 @@ class LocalApiHandler(BaseHTTPRequestHandler):
             self._error(HTTPStatus.NOT_FOUND, "not_found", "The requested endpoint does not exist.")
 
     def do_PUT(self) -> None:
+        if not self._require_auth():
+            return
         path = self._path()
         if path.startswith("/api/uploads/"):
             self._put_upload(path.removeprefix("/api/uploads/"))
@@ -116,6 +127,11 @@ class LocalApiHandler(BaseHTTPRequestHandler):
             self._error(HTTPStatus.NOT_FOUND, "not_found", "The requested endpoint does not exist.")
 
     def do_POST(self) -> None:
+        if self._path() == "/api/auth/check":
+            self._auth_check()
+            return
+        if not self._require_auth():
+            return
         if self._path() == "/api/sources/status":
             self._source_status()
             return
@@ -185,6 +201,34 @@ class LocalApiHandler(BaseHTTPRequestHandler):
         if request is None:
             return
         self._send_json(HTTPStatus.OK, self.server.advisor(request))
+
+    def _require_auth(self) -> bool:
+        """Shared-password gate for every /api/ handler except /api/auth/check.
+
+        Returns True when the request may proceed. Returns False after already
+        writing a 401 response, so callers must `return` immediately.
+        """
+        password = self.server.shared_password
+        if not password:
+            return True
+        header = self.headers.get("Authorization", "")
+        provided = header.removeprefix("Bearer ") if header.startswith("Bearer ") else ""
+        if not hmac.compare_digest(provided, password):
+            self._send_json(HTTPStatus.UNAUTHORIZED, {"error": "unauthorized"})
+            return False
+        return True
+
+    def _auth_check(self) -> None:
+        request = self._read_json_object()
+        if request is None:
+            return
+        password = self.server.shared_password
+        if not password:
+            self._send_json(HTTPStatus.OK, {"valid": True})
+            return
+        provided = request.get("password")
+        valid = isinstance(provided, str) and hmac.compare_digest(provided, password)
+        self._send_json(HTTPStatus.OK, {"valid": valid})
 
     def _player_status(self) -> None:
         query = parse_qs(urlparse(self.path).query)
@@ -413,15 +457,23 @@ class LocalApiHandler(BaseHTTPRequestHandler):
     def _error(self, status: HTTPStatus, code: str, message: str) -> None:
         self._send_json(status, {"error": {"code": code, "message": message}})
 
+    def _origin_allowed(self, origin: str) -> bool:
+        """Without ALLOWED_ORIGINS set, keep the permissive local/Codespaces default
+        (any Vite dev origin); with it set, only origins on that explicit list."""
+        allowed_origins = self.server.allowed_origins
+        if allowed_origins is None:
+            return bool(VITE_ORIGIN.fullmatch(origin))
+        return origin in allowed_origins
+
     def _send_json(self, status: HTTPStatus, value: Any) -> None:
         body = b"" if value is None else json.dumps(value, ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode("utf-8")
         self.send_response(status)
         origin = self.headers.get("Origin")
-        if origin and VITE_ORIGIN.fullmatch(origin):
+        if origin and self._origin_allowed(origin):
             self.send_header("Access-Control-Allow-Origin", origin)
             self.send_header("Vary", "Origin")
             self.send_header("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS")
-            self.send_header("Access-Control-Allow-Headers", "Content-Type, X-Filename")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, X-Filename, Authorization")
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
@@ -444,9 +496,24 @@ def create_server(
     advisor: AdvisorRunner | None = None,
     player_status_fetcher: PlayerStatusFetcher | None = None,
     profile_loader: ProfileLoader = load_profile,
+    shared_password: str | None = None,
+    allowed_origins: list[str] | None = None,
 ) -> LocalApiServer:
     """Create a local API server; inject a pipeline generator for tests or embedding."""
-    return LocalApiServer(address, profiles_dir=profiles_dir, datasets_dir=datasets_dir, uploads_dir=uploads_dir, default_profile_path=default_profile_path, generator=generator, simulator=simulator, advisor=advisor, player_status_fetcher=player_status_fetcher, profile_loader=profile_loader)
+    return LocalApiServer(
+        address,
+        profiles_dir=profiles_dir,
+        datasets_dir=datasets_dir,
+        uploads_dir=uploads_dir,
+        default_profile_path=default_profile_path,
+        generator=generator,
+        simulator=simulator,
+        advisor=advisor,
+        player_status_fetcher=player_status_fetcher,
+        profile_loader=profile_loader,
+        shared_password=shared_password,
+        allowed_origins=allowed_origins,
+    )
 
 
 def _simulate_current_dataset(profile: Any, output_dir: Path, iterations: int, seed: int) -> dict[str, Any]:
@@ -475,6 +542,25 @@ def _fetch_player_status_default(*, force_refresh: bool = False) -> dict[str, An
     return get_player_status(team_names, force_refresh=force_refresh)
 
 
+def _shared_password_from_env() -> str | None:
+    password = os.environ.get("APP_SHARED_PASSWORD")
+    if not password:
+        print(
+            "ATTENZIONE: APP_SHARED_PASSWORD non impostata, l'API è raggiungibile "
+            "senza autenticazione — impostala prima di esporre pubblicamente questo servizio",
+            file=sys.stderr,
+        )
+        return None
+    return password
+
+
+def _allowed_origins_from_env() -> list[str] | None:
+    raw = os.environ.get("ALLOWED_ORIGINS")
+    if not raw:
+        return None
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+
 def main(argv: list[str] | None = None) -> None:
     """Run the local API without creating a server during module import."""
     parser = argparse.ArgumentParser(description="Run the local fantasy advisor API.")
@@ -484,7 +570,14 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--datasets-dir", type=Path, default=Path("data/processed"))
     parser.add_argument("--uploads-dir", type=Path, default=Path("data/uploads"))
     args = parser.parse_args(argv)
-    server = create_server((args.host, args.port), profiles_dir=args.profiles_dir, datasets_dir=args.datasets_dir, uploads_dir=args.uploads_dir)
+    server = create_server(
+        (args.host, args.port),
+        profiles_dir=args.profiles_dir,
+        datasets_dir=args.datasets_dir,
+        uploads_dir=args.uploads_dir,
+        shared_password=_shared_password_from_env(),
+        allowed_origins=_allowed_origins_from_env(),
+    )
     try:
         server.serve_forever()
     except KeyboardInterrupt:

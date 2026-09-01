@@ -1,0 +1,10 @@
+.auth-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:var(--space-lg);background:var(--color-surface)}
+.auth-gate-card{width:100%;max-width:360px;display:grid;gap:var(--space-sm);background:var(--color-surface-raised);border-radius:var(--radius-md);box-shadow:var(--shadow-float);padding:var(--space-xl)}
+.auth-gate-card h1{margin:0;font-size:var(--text-xl);font-family:var(--font-display)}
+.auth-gate-card p{margin:0 0 var(--space-sm);color:var(--color-text-muted);font-size:var(--text-sm)}
+.auth-gate-card label{font-size:var(--text-xs);color:var(--color-text-muted)}
+.auth-gate-card input{border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);border-radius:var(--radius-sm);padding:10px 12px;min-height:44px;font:inherit;width:100%}
+.auth-gate-card button{margin-top:var(--space-sm);border:0;border-radius:var(--radius-sm);background:var(--color-pitch);color:var(--color-pitch-text);padding:10px 12px;min-height:44px;font-weight:700;cursor:pointer;transition:background var(--transition-fast)}
+.auth-gate-card button:hover:not(:disabled){background:var(--color-pitch-hover)}
+.auth-gate-card button:disabled{opacity:.65;cursor:wait}
+.auth-gate-card p.auth-gate-error{margin:0;color:var(--color-red-card);font-size:var(--text-sm)}

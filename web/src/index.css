@@ -21,6 +21,7 @@
 @import "./data-table.css" layer(components);
 @import "./skeleton.css" layer(components);
 @import "./watchlist-panel.css" layer(components);
+@import "./auth.css" layer(components);
 
 @layer components {
   .auction-advice {
